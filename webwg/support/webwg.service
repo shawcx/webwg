@@ -1,0 +1,12 @@
+[Unit]
+Description=WebWG Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=webwg-server
+User=root
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

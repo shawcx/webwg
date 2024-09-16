@@ -1,0 +1,129 @@
+<div class="card">
+  <h2 class="card-header">
+    <i class="fa-regular fa-fw fa-computer"></i> Peers
+    <a class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#peer-modal"><i class="fa-regular fa-plus"></i></a>
+  </h2>
+  <div class="card-body">
+    <table class="table table-hover" id="peers-table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Instance</th>
+          <th scope="col">Address</th>
+          <th scope="col">Rx</th>
+          <th scope="col">Tx</th>
+          <th scope="col">Date</th>
+          <th scope="col" style="width: 0px;"></th>
+        </tr>
+      </thead>
+      <tbody class="table-group-divider">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script type="text/template" id="t-peer-row">
+  <td>
+  <% if(has_config) { %>
+      <a href="javascript:void(0);" title="<%- pub %>" class="peer-row-name"><%- peer %></a></td>
+  <% } else { %>
+      <span title="<%- pub %>"><%- peer %></span></td>
+  <% } %>
+  <td><%- instance %></td>
+  <td><%- address %></td>
+  <td><%- rx %> <small><%- rs %></small></td>
+  <td><%- tx %> <small><%- ts %></small></td>
+  <td><%- new Date(created).short() %></td>
+  <td><a href="#" class="float-end link-danger del-row"><i class="fa-regular fa-fw fa-trash-can"></i></a></td>
+</script>
+
+<div class="modal fade" id="peer-modal" tabindex="-1" aria-labelledby="peer-modal-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="peer-modal-label">New Peer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form class="webwg-form" id="peer-new">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="input-group">
+                <span class="input-group-text webwg-label">Name</span>
+                <input type="text" class="form-control" id="peer-peer" name="peer" placeholder="Peer Name" aria-label="Peer Name" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="input-group">
+                <span class="input-group-text webwg-label">Instance</span>
+                <select class="form-select" id="peer-instance" name="instance"></select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="input-group">
+                <span class="input-group-text webwg-label">Address</span>
+                <input type="text" class="form-control" id="peer-address" name="address" placeholder="Address" aria-label="Network" required>
+                <span class="input-group-text">/24</span>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" form="peer-new" id="peer-save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="qr-modal" tabindex="-1" aria-labelledby="qr-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">QR <span id="modal-title-qr"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="qr-modal-body">
+        <div class="text-center" id="qr-img"></div>
+        <pre id="qr-config"></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2 class="card-header"><i class="fa-regular fa-fw fa-thumbs-up"></i> Pending</h2>
+  <div class="card-body">
+    <table class="table table-hover" id="pending-table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Instance</th>
+          <th scope="col">Address</th>
+          <th scope="col">Client</th>
+          <th scope="col">Date</th>
+          <th scope="col" style="width: 0px;"></th>
+          <th scope="col" style="width: 0px;"></th>
+        </tr>
+      </thead>
+      <tbody class="table-group-divider">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script type="text/template" id="t-req-row">
+  <td><a href="#" title="<%- pub %>"><%- peer %></a></td>
+  <td><%- instance %></td>
+  <td><%- address %></td>
+  <td><%- ip %></td>
+  <td><%- new Date(created).short() %></td>
+  <td><a href="#" class="float-end link-success approve-req"><i class="fa-regular fa-fw fa-check-circle"></i></a></td>
+  <td><a href="#" class="float-end link-danger del-row"><i class="fa-regular fa-fw fa-trash-can"></i></a></td>
+</script>
+

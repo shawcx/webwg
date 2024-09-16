@@ -1,0 +1,66 @@
+
+$bg: #e9ecef;
+//$bg: #2e3436;
+//$fg: #eeeeec;
+$fg: #1e2426;
+$outline: #fff;
+
+$modal-header-bg: #e9ecef;
+$modal-footer-bg: #e9ecef;
+
+@import 'bootstrap';
+
+@import "fontawesome";
+@import "regular";
+
+* {
+    font-family: monospace;
+}
+
+body {
+    //font-family: sans-serif;
+    font-size: 12pt;
+    background: $bg;
+    color: $fg;
+    background: $bg;
+    //background: $bg url("/images/bg.jpg") no-repeat fixed top;
+    background-size: cover;
+    margin-top: 0.5em;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.fade-in { animation: fadeIn 1s; }
+
+nav, div.card {
+    margin-bottom: 1em;
+}
+
+.webwg-label {
+    min-width: 7em;
+}
+
+.webwg-form {
+    > div.row:not(:first-child) {
+        margin-top: 0.25em;
+    }
+}
+
+.modal-header {
+    background: $modal-header-bg;
+}
+
+a {
+    text-decoration: none;
+}
+
+th,td {
+    white-space: nowrap;
+}
+
+.webwg-hilite {
+    font-style: italic;
+}

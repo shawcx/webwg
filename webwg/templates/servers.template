@@ -1,0 +1,111 @@
+<div class="card">
+  <h2 class="card-header">
+    <i class="fa-regular fa-fw fa-network-wired"></i> Server
+    <a class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#server-modal"><i class="fa-regular fa-plus"></i></a>
+  </h2>
+  <div class="card-body">
+    <table class="table table-hover" id="servers-table">
+      <thead>
+        <tr>
+          <th scope="col">Instance</th>
+          <th scope="col">Type</th>
+          <th scope="col">Interface</th>
+          <th scope="col">Network</th>
+          <th scope="col">Host</th>
+          <th scope="col">MTU</th>
+          <th scope="col">Peers</th>
+          <th scope="col" style="width: 0px;"></th>
+        </tr>
+      </thead>
+      <tbody class="table-group-divider">
+      <!-- added via Javascript -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script type="text/template" id="t-server-row">
+  <td><a href="#" title="<%- pub %>"><%- instance %></a></td>
+  <td><%- type %></td>
+  <td><%- interface %></td>
+  <td><%- network %>/24</td>
+  <td><%- host %>:<%- port %></td>
+  <td><%- mtu %></td>
+  <td>-</td>
+  <td><a href="#" class="link-danger del-row"><i class="fa-regular fa-trash-can"></i></a></td>
+</script>
+
+<div class="modal fade" id="server-modal" tabindex="-1" aria-labelledby="server-modal-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="server-modal-label">New Server</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form class="webwg-form" id="server-new">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="input-group">
+                <span class="input-group-text webwg-label">Type</span>
+                <select class="form-select" id="server-type" name="type">
+                  <option value="hub"  > Hub      </option>
+                  <option value="proxy"> Proxy    </option>
+                  <option value="proxy"> Isolated </option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="input-group">
+                <span class="input-group-text webwg-label">Instance</span>
+                <input type="text" class="form-control" id="instance" name="instance" placeholder="Instance Name" aria-label="Instance Name" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="input-group">
+                <span class="input-group-text webwg-label">Interface</span>
+                <input type="text" class="form-control" id="interface" name="interface" value="wg0" placeholder="Interface" aria-label="Interface">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="input-group">
+                <span class="input-group-text webwg-label">Host</span>
+                <input type="text" class="form-control" id="host" name="host" placeholder="Host" aria-label="Host">
+                <span class="input-group-text">:</span>
+                <input type="text" class="form-control" id="port" name="port" placeholder="Port" aria-label="Port">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="input-group">
+                <span class="input-group-text webwg-label">Network</span>
+                <input type="text" class="form-control" id="network" name="network" value="10.8.0.1" placeholder="Subnet" aria-label="Network">
+                <span class="input-group-text">/24</span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="input-group">
+                <span class="input-group-text webwg-label">MTU</span>
+                <input type="text" class="form-control" id="mtu" name="mtu" value="1280" placeholder="MTU" aria-label="MTU">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" form="server-new" id="server-save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+

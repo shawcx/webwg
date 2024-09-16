@@ -1,0 +1,11 @@
+[Unit]
+Description=WebWG Server Status Client
+After=network.target
+
+[Service]
+ExecStart=webwg-status
+Restart=on-failure
+RestartSec=60s
+
+[Install]
+WantedBy=multi-user.target

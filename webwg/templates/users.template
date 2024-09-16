@@ -1,0 +1,111 @@
+  <div class="card">
+    <h2 class="card-header">
+      <i class="fa-regular fa-fw fa-users"></i> Users
+      <a class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#user-modal"><i class="fa-regular fa-plus"></i></a>
+    </h2>
+    <div class="card-body">
+      <table class="table table-hover" id="users-table">
+        <thead>
+          <tr>
+            <th scope="col" style="width: 75%;">Username</th>
+            <th scope="col">Created</th>
+            <th scope="col">Last Login</th>
+            <th scope="col" style="width: 0px;"></th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        <!-- added via Javascript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="text/template" id="t-user-row">
+    <td><%- username %></td>
+    <td><%- new Date(created).short() %></td>
+    <td><%- last %></td>
+    <td>
+    <% if(current_user.username != username) { %>
+      <a href="#" class="float-end link-danger del-row"><i class="fa-regular fa-fw fa-trash-can"></i></a>
+    <% } else { %>
+      <i class="fa-regular fa-fw fa-user text-primary"></i>
+    <% } %>
+    </td>
+  </script>
+
+  <div class="modal fade" id="user-modal" tabindex="-1" aria-labelledby="user-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="user-modal-label">New User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form class="webwg-form" id="user-new">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="input-group">
+                  <span class="input-group-text webwg-label">Username</span>
+                  <input type="text" class="form-control" id="username" name="username" placeholder="Username" aria-label="Username" required>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="input-group">
+                  <span class="input-group-text webwg-label">Password</span>
+                  <input type="password" class="form-control" id="password" name="password" aria-label="Password" required>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="input-group">
+                  <span class="input-group-text webwg-label">Confirm</span>
+                  <input type="password" class="form-control" id="confirm" name="confirm" aria-label="Confirm" required>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" form="user-new" id="user-save">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="card-header"><i class="fa-regular fa-fw fa-right-to-bracket"></i> Sessions</h2>
+    <div class="card-body">
+      <table class="table table-hover" id="sessions-table">
+        <thead>
+          <tr>
+            <th scope="col">User</th>
+            <th scope="col">Browser</th>
+            <th scope="col">IP Address</th>
+            <th scope="col">Time</th>
+            <th scope="col" style="width: 0px;"></th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        <!-- added via Javascript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script type="text/template" id="t-session-row">
+    <td><%- username %></td>
+    <td><small><%- agent.slice(0,80) %></small></td>
+    <td><%- ip %></td>
+    <td><%- new Date(time).short() %></td>
+    <td>
+    <% if(current_user.id != id) { %>
+      <a href="#" class="float-end link-danger del-row"><i class="fa-regular fa-fw fa-trash-can"></i></a>
+    <% } else { %>
+      <i class="fa-regular fa-fw fa-user text-primary"></i>
+    <% } %>
+    </td>
+  </script>

@@ -1,0 +1,28 @@
+{
+  "name": "webwg",
+  "version": "0.1.0",
+  "description": "WebWG",
+  "browser": "webwg.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shawcx/webwg.git"
+  },
+  "keywords": [],
+  "author": "Matthew Shaw",
+  "license": "TBD",
+  "dependencies": {
+    "@popperjs/core": "^2.11.6",
+    "backbone": "^1.4.1",
+    "bootstrap": "^5.2.1",
+    "jquery": "^3.6.1",
+    "underscore": "^1.13.4"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-pro": "^6.2.0",
+    "browserify": "^17.0.0",
+    "sass": "^1.54.9"
+  }
+}

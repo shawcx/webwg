@@ -1,0 +1,5 @@
+{% import json %}
+{% autoescape None %}
+<script>
+  var current_user = {{ json.dumps(current_user) }}
+</script>
