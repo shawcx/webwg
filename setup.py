@@ -8,25 +8,23 @@ import setuptools
 exec(compile(open('webwg/version.py').read(),'version.py','exec'))
 
 setuptools.setup(
-    name             = 'WebWG',
-    author           = 'Matthew Shaw',
-    author_email     = 'mshaw.cx@gmail.com',
+    name             = 'webwg',
     version          = __version__,
-    description      = 'WireGuard Web UI',
+    author           = __author__,
+    author_email     = __email__,
+    description      = '_.py webwg',
     long_description = open('README.rst').read(),
-    license          = 'Proprietary',
+    license          = 'TBD',
     packages         = setuptools.find_packages(),
     entry_points = {
         'console_scripts' : [
-            'webwg-server = webwg.application:main',
+            'webwg-server = webwg:webwg.main',
             ]
         },
     include_package_data = True,
     install_requires = [
-        'tornado',
+        'underscorepy',
         'aiosqlite',
-        'redis',
-        'hiredis',
         'cryptography',
         'qrcode',
         ],

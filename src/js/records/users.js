@@ -5,25 +5,23 @@ var _        = require('underscore')
 var Backbone = require('backbone')
 
 
-class Pending {
-    constructor() {
-    }
-
+class Users {
     static Model = Backbone.Model.extend({
-        idAttribute: 'pub',
-        urlRoot:     '/data/pending/',
+        idAttribute: 'username',
+        urlRoot:     '/logins/dblogin/',
     })
 
     static Collection = Backbone.Collection.extend({
-        model: Pending.Model,
-        url:   Pending.Model.prototype.urlRoot,
+        model: Users.Model,
+        url:   Users.Model.prototype.urlRoot,
         parse: function(response) {
-            return response.data;
+            return response.data
         },
     })
 
+
     static View = Backbone.View.extend({
-        el: function() { return $('#pending-table') },
+        el: function() { return $('#users-table') },
 
         initialize: function(options) {
             _.bindAll(this, 'Add')
@@ -43,8 +41,8 @@ class Pending {
         },
 
         Add: function(model) {
-            let entry = new Pending.Row({
-                id: `req_row_${ model.id }`,
+            let entry = new Users.Row({
+                id: "user_row_${ model.id }",
                 model: model,
                 })
             this.$tbody.append(entry.$el)
@@ -55,14 +53,13 @@ class Pending {
         tagName: 'tr',
 
         events: {
-            'click .approve-req' : 'onApprove',
-            'click .del-row'     : 'onDelete',
+            'click .del-row' : 'onDelete',
         },
 
         initialize: function(options) {
             _.bindAll(this, 'render')
 
-            this.template = Templates['req-row']
+            this.template = Templates['user-row']
 
             this.render()
 
@@ -75,14 +72,16 @@ class Pending {
 
         render: function() {
             let model = this.model.toJSON()
+            if (model.last) {
+                model.last = new Date(model.last).short()
+            } else {
+                model.last = ''
+            }
             this.$el.html(this.template(model))
+            if (model.username == current_user.username) {
+                this.$el.addClass('table-light webwg-hilite')
+            }
             return this
-        },
-
-        onApprove: function(event) {
-            this.model.save(null, {wait:true})
-            event.stopPropagation()
-            return false
         },
 
         onDelete: function (event) {
@@ -91,8 +90,42 @@ class Pending {
             return false
         },
     })
+
+    static ModalView = Backbone.View.extend({
+        el: function() { return $('#user-modal') },
+
+        events: {
+            'submit' : 'onSubmit',
+        },
+
+        initialize: function(options) {
+            this.el.addEventListener('show.bs.modal', this.onShow)
+            return this
+        },
+
+        onShow: function(event) {
+            return
+        },
+
+        onSubmit: function(event) {
+            let values = {}
+            $('#user-new :input').each(function() {
+                values[this.name] = $(this).val();
+            })
+
+            let user = new Users.Model
+            user.save(values, {
+                wait: true,
+                success: () => {
+                    $(this.el).modal('hide')
+                    return
+                }
+            })
+            event.preventDefault()
+            event.stopPropagation()
+            return false
+        }
+    })
 }
 
-
-module.exports = Pending
-
+module.exports = Users

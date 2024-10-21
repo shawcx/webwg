@@ -1,2 +1,2 @@
 import webwg
-webwg.main()
+webwg.WebWg.main()

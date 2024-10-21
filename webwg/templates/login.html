@@ -14,8 +14,8 @@
   <div class="card">
     <h4 class="card-header">Login</h4>
     <div class="card-body">
-      <form action="/login" method="POST">
-        <input type="hidden" name="redir" value="{{redir}}" />
+      <form action="/login/dblogin" method="POST">
+        <input type="hidden" name="next" value="{{next_url}}" />
         <div class="mb-3">
           <label for="inputUser" class="form-label">User</label>
           <input type="text" class="form-control" id="inputUser" name="username" required autofocus>

@@ -24,16 +24,21 @@
 
 <script type="text/template" id="t-peer-row">
   <td>
-  <% if(has_config) { %>
-      <a href="javascript:void(0);" title="<%- pub %>" class="peer-row-name"><%- peer %></a></td>
+  <% if(0) { %>
+      <a href="javascript:void(0);" title="<%- pub %>" class="peer-row-name"><%- name %></a></td>
   <% } else { %>
-      <span title="<%- pub %>"><%- peer %></span></td>
+      <span title="<%- pub %>"><%- name %></span></td>
   <% } %>
   <td><%- instance %></td>
   <td><%- address %></td>
   <td><%- rx %> <small><%- rs %></small></td>
   <td><%- tx %> <small><%- ts %></small></td>
-  <td><%- new Date(created).short() %></td>
+  <td>
+    <% if(created) { %>
+    <%- new Date(created).short() %></td>
+    <% } else { %>
+    -
+    <% } %>
   <td><a href="#" class="float-end link-danger del-row"><i class="fa-regular fa-fw fa-trash-can"></i></a></td>
 </script>
 
@@ -50,7 +55,7 @@
             <div class="col-md-12">
               <div class="input-group">
                 <span class="input-group-text webwg-label">Name</span>
-                <input type="text" class="form-control" id="peer-peer" name="peer" placeholder="Peer Name" aria-label="Peer Name" required>
+                <input type="text" class="form-control" id="peer-name" name="name" placeholder="Peer Name" aria-label="Peer Name" required>
               </div>
             </div>
           </div>
@@ -118,7 +123,7 @@
 </div>
 
 <script type="text/template" id="t-req-row">
-  <td><a href="#" title="<%- pub %>"><%- peer %></a></td>
+  <td><a href="#" title="<%- pub %>"><%- name %></a></td>
   <td><%- instance %></td>
   <td><%- address %></td>
   <td><%- ip %></td>

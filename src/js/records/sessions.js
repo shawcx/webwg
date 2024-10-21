@@ -6,19 +6,16 @@ var Backbone = require('backbone')
 
 
 class Sessions {
-    constructor() {
-    }
-
     static Model = Backbone.Model.extend({
-        idAttribute: 'id',
-        urlRoot:     '/data/sessions/',
+        idAttribute: 'session_id',
+        urlRoot:     '/sessions/dbcache/',
     })
 
     static Collection = Backbone.Collection.extend({
         model: Sessions.Model,
         url:   Sessions.Model.prototype.urlRoot,
         parse: function(response) {
-            return response.data;
+            return response.data
         },
     })
 
@@ -86,6 +83,4 @@ class Sessions {
     })
 }
 
-
 module.exports = Sessions
-

@@ -7,7 +7,7 @@ var Backbone = require('backbone')
 
 class Peers {
     static Model = Backbone.Model.extend({
-        idAttribute: 'peer',
+        idAttribute: 'name',
         urlRoot:     '/data/peers/',
         defaults: {
             "rx":  0,
@@ -166,11 +166,11 @@ class Peers {
         },
 
         Remove: function (model) {
-            console.log('Removed', model.id, model.toJSON())
+            //console.log('Removed', model.id, model.toJSON())
         },
 
         onChange: function (event) {
-            console.log('Selected:', this.el.value)
+            //console.log('Selected:', this.el.value)
         },
     })
 

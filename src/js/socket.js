@@ -2,14 +2,14 @@
 
 var $ = require('jquery')
 
-class Socket {
+class WebWgSocket {
     constructor(_options) {
         this.options = {
             path      : 'ws',
             timeout   : 0.9375,
             maxtime   : 60,
-            ping      : 300,
-            onmessage : function() {}
+            ping      : 299,
+            onmessage : function(msg) {}
         }
 
         if (_options) {
@@ -23,7 +23,6 @@ class Socket {
 
         this.timeout = this.options.timeout
         this.connect()
-        return
     }
 
     connect() {
@@ -33,29 +32,27 @@ class Socket {
             this.timeout = this.options.timeout
             if (this.options.ping) {
                 this.interval = setInterval(() => {
-                    this.ws.send('ping')
-                    return
+                    this.ws.send('"ping"')
                 }, 1000 * this.options.ping)
             }
-            return
         }
 
         this.ws.onmessage = (event) => {
             let msg = JSON.parse(event.data)
+            if (msg == "ping") {
+                return
+            }
             this.options.onmessage(msg)
-            return
         }
 
         this.ws.onerror = (event) => {
             clearInterval(this.interval)
             this.timeout = this.timeout * 2
-            return
         }
 
         this.ws.onclose = (event) => {
             if (event.code == 4004) {
                 window.location.reload()
-                return
             }
 
             clearInterval(this.interval)
@@ -68,15 +65,16 @@ class Socket {
                     this.connect()
                     return
                 }, 1000 * this.timeout)
-            return
         }
-        return
+    }
+
+    sendraw(message) {
+        this.ws.send(message)
     }
 
     send(message) {
         this.ws.send(JSON.stringify(message))
-        return
     }
 }
 
-module.exports = Socket
+module.exports = WebWgSocket

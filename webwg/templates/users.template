@@ -102,7 +102,7 @@
     <td><%- ip %></td>
     <td><%- new Date(time).short() %></td>
     <td>
-    <% if(current_user.id != id) { %>
+    <% if(current_user.session_id != session_id) { %>
       <a href="#" class="float-end link-danger del-row"><i class="fa-regular fa-fw fa-trash-can"></i></a>
     <% } else { %>
       <i class="fa-regular fa-fw fa-user text-primary"></i>

@@ -1,27 +1,27 @@
 'use strict'
 
-var $        = require('jquery')
-var _        = require('underscore')
-var Backbone = require('backbone')
+var $         = require('jquery')
+var _         = require('underscore')
+var Backbone  = require('backbone')
+var bootstrap = require('bootstrap')
 
 
-class Users {
+class Servers {
     static Model = Backbone.Model.extend({
-        idAttribute: 'username',
-        urlRoot:     '/data/users/',
+        idAttribute: 'instance',
+        urlRoot:     '/data/servers/',
     })
 
     static Collection = Backbone.Collection.extend({
-        model: Users.Model,
-        url:   Users.Model.prototype.urlRoot,
-
+        model: Servers.Model,
+        url:   Servers.Model.prototype.urlRoot,
         parse: function(response) {
             return response.data;
         },
     })
 
     static View = Backbone.View.extend({
-        el: function() { return $('#users-table') },
+        el: function() { return $('#servers-table') },
 
         initialize: function(options) {
             _.bindAll(this, 'Add')
@@ -41,8 +41,8 @@ class Users {
         },
 
         Add: function(model) {
-            let entry = new Users.Row({
-                id: "user_row_${ model.id }",
+            let entry = new Servers.Row({
+                id: `server_row_${ model.id }`,
                 model: model,
                 })
             this.$tbody.append(entry.$el)
@@ -59,7 +59,7 @@ class Users {
         initialize: function(options) {
             _.bindAll(this, 'render')
 
-            this.template = Templates['user-row']
+            this.template = Templates['server-row']
 
             this.render()
 
@@ -72,14 +72,9 @@ class Users {
 
         render: function() {
             let model = this.model.toJSON()
-            if (model.last) {
-                model.last = new Date(model.last).short()
-            } else {
-                model.last = ''
-            }
             this.$el.html(this.template(model))
-            if (model.username == current_user.username) {
-                this.$el.addClass('table-light webwg-hilite')
+            if (model.id == current_user.id) {
+                this.$el.addClass('table-light')
             }
             return this
         },
@@ -92,7 +87,9 @@ class Users {
     })
 
     static ModalView = Backbone.View.extend({
-        el: function() { return $('#user-modal') },
+        el: function() {
+            return $('#server-modal')
+        },
 
         events: {
             'submit' : 'onSubmit',
@@ -103,31 +100,47 @@ class Users {
             return this
         },
 
-        onShow: function(event) {
+        onShow: event => {
             return
         },
 
         onSubmit: function(event) {
             let values = {}
-            $('#user-new :input').each(function() {
+            $('#server-new :input').each(function() {
                 values[this.name] = $(this).val();
             })
 
-            let user = new Users.Model
-            user.save(values, {
+            let onSuccess = (function(model) {
+                let modal = bootstrap.Modal.getInstance(this.el)
+                modal.hide()
+                return
+            }).bind(this);
+
+            let server = new Servers.Model()
+            server.save(values, {
                 wait: true,
-                success: () => {
-                    $(this.el).modal('hide')
-                    return
+                success: onSuccess
                 }
-            })
+            )
             event.preventDefault()
             event.stopPropagation()
             return false
         }
     })
+
+    static process(status) {
+        for(const wg in status) {
+            let instance = status[wg]
+            console.log(wg, instance.pub, instance.port)
+            for(const peer of instance.peers) {
+                for(const key in peer) {
+                    let value = peer[key]
+                    console.log('   ',key, value)
+                }
+            }
+        }
+    }
 }
 
 
-module.exports = Users
-
+module.exports = Servers

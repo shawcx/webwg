@@ -7,6 +7,7 @@ BROWSERIFY = ./node_modules/.bin/browserify
 STATIC_ROOT = ../webwg/static
 
 JS_FILES := $(wildcard js/*.js)
+JS_FILES := $(JS_FILES) $(wildcard js/records/*.js)
 JS_FILE   = js/webwg.js
 JS_OUT    = $(STATIC_ROOT)/$(JS_FILE)
 

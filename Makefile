@@ -2,8 +2,8 @@
 all:
 	@make -C src
 
-run:
-	python3 -m webwg
+run: all
+	/opt/webwg/bin/python3 -m webwg --debug
 
 clean:
 	@make -C src clean
