@@ -1,14 +1,21 @@
 
 import base64
-import json
+import io
 import logging
-import os
-import time
-import uuid
+import sys
 
 import _.websockets
 
-import webwg
+try:
+    import qrcode
+except ImportError:
+    print('[!] ERROR: qrcode module missing')
+    print('      apt install python3-qrcode')
+    print('      pip install qrcode')
+    print('      https://github.com/lincolnloop/python-qrcode')
+    sys.exit(-1)
+    sys.exit(-1)
+
 
 
 class Socket(_.websockets.Protected):
@@ -16,3 +23,32 @@ class Socket(_.websockets.Protected):
         logging.info('websocket:on_message: %s', msg)
         self.write_message(msg)
 
+
+class QR(_.handlers.Protected):
+    @_.auth.protected
+    async def get(self, pub=None):
+        if not pub:
+            raise _.HTTPError(404)
+
+        config = self.application.configs.pop(pub, None)
+        if not config:
+            raise _.HTTPError(404)
+
+        qr = qrcode.QRCode()
+        qr.add_data(config)
+
+        if _.args.debug:
+            print()
+            print(config)
+            print()
+            qr.print_ascii()
+
+        img = qr.make_image()
+        buffer = io.BytesIO()
+        img.save(buffer, format='png')
+
+        buffer = base64.b64encode(buffer.getvalue()).decode('ascii')
+        buffer = 'data:image/png;base64,' + buffer
+        self.write({'png':buffer,'config':config})
+
+        await self.application.broadcast(dict(action='update', collection='peers', key='pub', data={'pub':pub,'has_config':False}))

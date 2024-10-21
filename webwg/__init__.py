@@ -1,6 +1,4 @@
 
-system = platform.system().lower()
-
 from . import version
 from . import crypto
 

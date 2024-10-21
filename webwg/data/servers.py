@@ -58,11 +58,11 @@ class ServersHandler(_.records.HandlerInterface):
 
         await _.sqlite.upsert(server)
 
-        self.application.create(server)
+        self.application.add_server(server)
 
         server = server._as_dict()
         server.pop('priv')
-        print(server)
+
         self.write(server)
         await self.application.broadcast(dict(action='add', collection='servers', data=server))
 
@@ -77,13 +77,13 @@ class ServersHandler(_.records.HandlerInterface):
         peers = await _.sqlite.find(_.data.peers, server.instance, 'instance')
         pending = await _.sqlite.find(_.data.pending, server.instance, 'instance')
 
-        self.application.ip('link', 'delete', server.interface)
+        self.application.remove_server(server)
 
         await _.sqlite.delete(server)
     
+        self.set_status(204)
         for peer in peers:
             await self.application.broadcast(dict(action='delete', collection='peers', id=peer.name))
         for queue in pending:
             await self.application.broadcast(dict(action='delete', collection='pending', id=queue.name))
         await self.application.broadcast(dict(action='delete', collection='servers', id=server.instance))
-        self.set_status(204)

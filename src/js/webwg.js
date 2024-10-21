@@ -113,7 +113,7 @@ class WebWgApp {
             return
         }
 
-        let key   = collection.model.prototype.idAttribute
+        let key   = msg.key || collection.model.prototype.idAttribute
         let value = msg.data[key]
 
         let model = collection.findWhere({[key]:value})

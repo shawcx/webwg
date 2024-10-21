@@ -24,22 +24,26 @@ class WebWg(_.Application):
     async def initialize(self):
         self.websockets = {}
         self.interfaces = {}
+        self.configs    = {}
         
         for server in await _.sqlite.find(_.data.servers):
-            self.create(server)
+            self.add_server(server)
 
         for peer in await _.sqlite.find(_.data.peers):
-            self.add(peer)
+            self.add_peer(peer)
 
         self.patterns = [
-            #( r'/config/(.*)',   handlers.Config     ),
-            #( r'/qr/(.*)',       handlers.QR         ),
+            ( r'/qr/(.*)',  webwg.handlers.QR         ),
             ( r'/ws',       webwg.handlers.Socket, { 'websockets' : self.websockets } ),
             ( r'/([a-z]*)', _.handlers.Protected ),
             ]
 
         #self.status_task  = self.periodic(10, self.status)
         #self.status_task.cancel()
+
+    async def on_stop(self):
+        for server in await _.sqlite.find(_.data.servers):
+            self.remove_server(server)
 
     async def broadcast(self, msg):
         'Broadcast a message to all connected sockets'
@@ -54,12 +58,13 @@ class WebWg(_.Application):
         user.disabled = False
         user.isadmin  = True
         user.created  = _.now()
-        await self.broadcast(dict(action='add', collection='users', data=user._as_dict()))
+        try:
+            await self.broadcast(dict(action='add', collection='users', data=user._as_dict()))
+        except AttributeError:
+            pass
 
     async def on_dbcache_delete(self, component, session_id):
         'allow apps to make adjustments to the record before calling sql statement'
-        print('on_dbcache_delete', component, session_id)
-        print()
         await self.broadcast(dict(action='delete', collection='sessions', id=session_id))
 
     async def on_login(self, handler, user):
@@ -80,30 +85,46 @@ class WebWg(_.Application):
         elapsed = (time.time() - created) / 3600
         return elapsed > expires
 
-    def create(self, server):
+    def add_server(self, server):
         self.interfaces[server.instance] = server.interface
         logging.info('Creating wireguard inteface: %s: %s', server.interface, f'{server.network}/24')
-        WebWg.ip('link','add', server.interface, 'type', 'wireguard')
-        WebWg.ip('address','add', 'dev', server.interface, f'{server.network}/24')
-        WebWg.wg('set', server.interface,
+        self.ip('link','add', server.interface, 'type', 'wireguard')
+        self.ip('address','add', 'dev', server.interface, f'{server.network}/24')
+        self.wg('set', server.interface,
             'listen-port', f'{server.port}',
             'private-key', '/dev/stdin',
             stdin=server.priv
             )
-        WebWg.ip('link','set', 'up', 'dev', server.interface)
+        self.ip('link','set', 'up', 'dev', server.interface)
 
-    def add(self, peer):
+    def remove_server(self, server):
+        interface = self.interfaces.pop(server.instance, None)
+        logging.info('Removing wireguard inteface: %s: %s', server.interface, f'{server.network}/24')
+        self.ip('link','delete', server.interface)
+
+    def add_peer(self, peer):
         try:
             interface = self.interfaces[peer.instance]
         except KeyError:
             logging.error('No interface!')
             return
         logging.info('Adding wireguard peer: %s: %s: %s', interface, peer.name, f'{peer.address}')
-        WebWg.wg('set', interface,
+        self.wg('set', interface,
             'peer', peer.pub,
             'preshared-key', '/dev/stdin',
             'allowed-ips', f'{peer.address}/32',
             stdin=peer.psk
+            )
+
+    def remove_peer(self, peer):
+        try:
+            interface = self.interfaces[peer.instance]
+        except KeyError:
+            logging.error('No interface!')
+            return
+        logging.info('Removing wireguard peer: %s: %s: %s', interface, peer.name, f'{peer.address}')
+        self.wg('set', interface,
+            'peer', peer.pub, 'remove'
             )
 
     @staticmethod

@@ -138,12 +138,10 @@ class PendingHandler(_.records.HandlerInterface):
         peer.address  = pending.address
         peer.created  = pending.created
 
-        #serverConfig.addPeer(**pending)
-
         await _.sqlite.upsert(peer)
         await _.sqlite.delete(pending)
 
-        self.application.add(peer)
+        self.application.add_peer(peer)
 
         peer = peer._as_dict()
         peer['has_config'] = False
@@ -160,5 +158,5 @@ class PendingHandler(_.records.HandlerInterface):
         count = await self._db.delete(_.data.pending, name)
         if not count:
             raise _.HTTPError(404)
-        self.application.broadcast(dict(action='delete', collection='pending', id=name))
         self.set_status(204)
+        self.application.broadcast(dict(action='delete', collection='pending', id=name))

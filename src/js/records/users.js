@@ -1,8 +1,9 @@
 'use strict'
 
-var $        = require('jquery')
-var _        = require('underscore')
-var Backbone = require('backbone')
+var $         = require('jquery')
+var _         = require('underscore')
+var Backbone  = require('backbone')
+var bootstrap = require('bootstrap')
 
 
 class Users {
@@ -117,7 +118,8 @@ class Users {
             user.save(values, {
                 wait: true,
                 success: () => {
-                    $(this.el).modal('hide')
+                    let modal = bootstrap.Modal.getInstance(this.el)
+                    modal.hide()
                     return
                 }
             })

@@ -1,8 +1,9 @@
 'use strict'
 
-var $        = require('jquery')
-var _        = require('underscore')
-var Backbone = require('backbone')
+var $         = require('jquery')
+var _         = require('underscore')
+var Backbone  = require('backbone')
+var bootstrap = require('bootstrap')
 
 
 class Peers {
@@ -12,6 +13,7 @@ class Peers {
         defaults: {
             "rx":  0,
             "tx":  0,
+            "has_config" : false,
         }
     })
 
@@ -119,11 +121,11 @@ class Peers {
             let qr = new Peers.QR({pub: this.model.get('pub')})
             qr.fetch({
                 success: (qr) => {
-                    console.log('???', qr)
                     $('#modal-title-qr').text(this.model.id)
                     $('#qr-img').html(`<img src="${qr.get('png')}" />`)
                     $('#qr-config').text(qr.get('config'))
-                    $('#qr-modal').modal('show')
+                    let modal = new bootstrap.Modal('#qr-modal')
+                    modal.show()
                 }
             })
         },
@@ -203,7 +205,8 @@ class Peers {
             console.log('------------')
 
             let onSuccess = (function(model) {
-                $('#peer-modal').modal('hide')
+                let modal = bootstrap.Modal.getInstance(this.el)
+                modal.hide()
                 return
             }).bind(this);
 

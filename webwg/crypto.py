@@ -12,6 +12,7 @@ try:
 except ImportError:
     print('[!] ERROR: cryptography module missing')
     print('      apt install python3-cryptography')
+    print('      pip install cryptography')
     print('      https://cryptography.io')
     sys.exit(-1)
 

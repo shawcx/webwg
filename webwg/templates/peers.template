@@ -24,7 +24,7 @@
 
 <script type="text/template" id="t-peer-row">
   <td>
-  <% if(0) { %>
+  <% if(has_config) { %>
       <a href="javascript:void(0);" title="<%- pub %>" class="peer-row-name"><%- name %></a></td>
   <% } else { %>
       <span title="<%- pub %>"><%- name %></span></td>
