@@ -67,18 +67,38 @@ class WebWg(_.Application):
         'allow apps to make adjustments to the record before calling sql statement'
         await self.broadcast(dict(action='delete', collection='sessions', id=session_id))
 
-    async def on_login(self, handler, user):
-        user.last = int(time.time() * 1000)
-        await _.sqlite.upsert(user)
+    async def on_gitlab_login_success(self, handler, user):
+        if user['bot']:
+            raise _.HTTPError(403)
 
         session = {
             'session_id' : str(uuid.uuid4()),
-            'username'   : user.username,
+            'auth'       : 'GitLab',
+            'username'   : user['username'],
             'agent'      : handler.request.headers.get('User-Agent', ''),
             'ip'         : handler.request.remote_ip,
             'time'       : _.now(),
             }
+        await self.broadcast(dict(action='add', collection='sessions', data=session))
         return session
+
+    async def on_login_success(self, handler, user):
+        user.last = _.now()
+        await _.sqlite.upsert(user)
+
+        session = {
+            'session_id' : str(uuid.uuid4()),
+            'auth'       : 'Database',
+            'username'   : user.username,
+            'agent'      : handler.request.headers.get('User-Agent', ''),
+            'ip'         : handler.request.remote_ip,
+            'time'       : user.last,
+            }
+        await self.broadcast(dict(action='add', collection='sessions', data=session))
+        return session
+
+    async def on_logout(self, session_id):
+        await self.broadcast(dict(action='delete', collection='sessions', id=session_id))
 
     async def is_session_expired(self, session, expires):
         created = session['time'] / 1000

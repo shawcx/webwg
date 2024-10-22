@@ -1,7 +1,7 @@
 *.pyc
-*.sqlite
-*.sqlite-journal
 /webwg/static
+/webwg/*.ini.local
+/webwg.db
 /build
 /dist
 /*.egg-info

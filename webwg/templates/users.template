@@ -83,6 +83,7 @@
         <thead>
           <tr>
             <th scope="col">User</th>
+            <th scope="col">Auth</th>
             <th scope="col">Browser</th>
             <th scope="col">IP Address</th>
             <th scope="col">Time</th>
@@ -98,6 +99,7 @@
 
   <script type="text/template" id="t-session-row">
     <td><%- username %></td>
+    <td><%- auth %></td>
     <td><small><%- agent.slice(0,80) %></small></td>
     <td><%- ip %></td>
     <td><%- new Date(time).short() %></td>
