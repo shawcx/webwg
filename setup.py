@@ -16,9 +16,10 @@ setuptools.setup(
     long_description = open('README.rst').read(),
     license          = 'TBD',
     packages         = setuptools.find_packages(),
+    package_data={"webwg": ["*.*"]},
     entry_points = {
         'console_scripts' : [
-            'webwg-server = webwg:webwg.main',
+            'webwg-server = webwg:WebWg.main',
             ]
         },
     include_package_data = True,

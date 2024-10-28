@@ -4,4 +4,5 @@
 /webwg.db
 /build
 /dist
+/deb_dist
 /*.egg-info

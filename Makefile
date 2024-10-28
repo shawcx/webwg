@@ -2,8 +2,11 @@
 all:
 	@make -C src
 
+deb: all
+	python3 setup.py --command-packages=stdeb.command bdist_deb
+
 run: all
-	/opt/webwg/bin/python3 -m webwg --debug
+	python3 -m webwg --debug
 
 clean:
 	@make -C src clean
