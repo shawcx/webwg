@@ -21,7 +21,7 @@ class Pending {
         },
     })
 
-    // requests waiting for approval on the current server
+    // requests waiting for approval on the current server, hidden when there are none
     static View = Backbone.View.extend({
         el: function() { return $('#pending-card') },
 
@@ -45,12 +45,8 @@ class Pending {
             this.rows = models.map((model) => new Pending.Row({model: model}))
             this.$list.append(this.rows.map((row) => row.el))
 
-            let count = this.$('#pending-count')
-            count.text(models.length)
-            count.toggleClass('wg-count-warn', !!models.length)
-            this.$list.prop('hidden', !models.length)
-            this.$('#pending-empty').prop('hidden', !!models.length)
-            this.$('#pending-command').text(`python3 cliwg.py ${location.origin} <name> -i ${instance}`)
+            this.$('#pending-count').text(models.length)
+            this.$el.prop('hidden', !models.length)
             return this
         },
 

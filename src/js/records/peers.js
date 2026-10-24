@@ -130,6 +130,7 @@ class Peers {
             this.$('#peers-count').text(models.length)
             this.$('#peers-wrap').prop('hidden', !models.length)
             this.$('#peers-empty').prop('hidden', !!models.length)
+            this.$('#peers-command').text(`python3 cliwg.py ${location.origin} <name> -i ${instance}`)
             return this
         },
 

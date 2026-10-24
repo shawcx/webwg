@@ -48,16 +48,12 @@
     <div class="wg-page" id="page-server" hidden>
       <div id="server-detail"></div>
 
-      <section class="card wg-card" id="pending-card" aria-labelledby="pending-h">
+      <section class="card wg-card" id="pending-card" aria-labelledby="pending-h" hidden>
         <div class="wg-card-head">
           <h2 id="pending-h">Waiting for approval</h2>
-          <span class="wg-count" id="pending-count">0</span>
+          <span class="wg-count wg-count-warn" id="pending-count">0</span>
         </div>
         <ul class="wg-list" id="pending-list"></ul>
-        <div class="wg-empty" id="pending-empty" hidden>
-          <p>No requests waiting. A device asks to join <span class="server-name"></span> from the <a href="/join">join page</a> in its browser, or by running:</p>
-          <code class="wg-code" id="pending-command"></code>
-        </div>
       </section>
 
       <section class="card wg-card" id="peers-card" aria-labelledby="peers-h">
@@ -82,7 +78,10 @@
             <tbody></tbody>
           </table>
         </div>
-        <p class="wg-empty" id="peers-empty" hidden>No peers on <span class="server-name"></span> yet. Approve a request above, or add one with New peer.</p>
+        <div class="wg-empty" id="peers-empty" hidden>
+          <p>No peers on <span class="server-name"></span> yet. Add one with New peer, or have a device ask to join from the <a href="/join">join page</a> in its browser or by running:</p>
+          <code class="wg-code" id="peers-command"></code>
+        </div>
       </section>
     </div>
 
