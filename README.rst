@@ -5,6 +5,9 @@ WebWG runs WireGuard servers on a Linux machine and gives admins a web page
 to manage them: approve devices that ask to join, add peers, hand out their
 configs as a QR code or a file, and watch who is online.
 
+.. image:: docs/screenshot.png
+   :alt: The page of a hub server in WebWG, with a phone waiting for approval and three of its four peers online
+
 Features
 --------
 
