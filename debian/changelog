@@ -6,5 +6,6 @@ webwg (0.3.0) unstable; urgency=medium
   * License webwg under MIT.
   * Use Bootstrap Icons in place of Font Awesome Pro, so the build needs no
     private npm registry and the package holds no commercial fonts.
+  * Bundle the scripts with esbuild in place of browserify.
 
  -- Matthew Shaw <mshaw.cx@gmail.com>  Sat, 24 Oct 2026 14:43:32 -0400

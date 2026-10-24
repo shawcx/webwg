@@ -1,8 +1,11 @@
 
 PATH := $(PATH):/opt/homebrew/bin
 
-SASS       = ./node_modules/.bin/sass
-BROWSERIFY = ./node_modules/.bin/browserify
+SASS    = ./node_modules/.bin/sass
+ESBUILD = ./node_modules/.bin/esbuild
+
+# one minified script per page for the browsers of the last few years
+ESBUILD_FLAGS = --bundle --minify --format=iife --target=es2020 --log-level=warning
 
 STATIC_ROOT = ../webwg/static
 
@@ -46,12 +49,12 @@ node_modules:
 	@npm install .
 
 $(JS_OUT): $(JS_FILES)
-	@echo browserify $(JS_FILE) '=>' $@
-	@$(BROWSERIFY) $(JS_FILE) -o $@
+	@echo esbuild $(JS_FILE) '=>' $@
+	@$(ESBUILD) $(JS_FILE) $(ESBUILD_FLAGS) --outfile=$@
 
 $(JOIN_OUT): $(JOIN_FILE) js/wgkeys.js
-	@echo browserify $(JOIN_FILE) '=>' $@
-	@$(BROWSERIFY) $(JOIN_FILE) -o $@
+	@echo esbuild $(JOIN_FILE) '=>' $@
+	@$(ESBUILD) $(JOIN_FILE) $(ESBUILD_FLAGS) --outfile=$@
 
 $(CLIWG_OUT): ../cliwg.py
 	@cp -v $< $@
