@@ -3,6 +3,7 @@ webwg (0.3.0) unstable; urgency=medium
   * Package with debhelper and pybuild from pyproject.toml in place of
     stdeb, for Debian 13 and later and Ubuntu 25.04 and later.
   * Run the service as the webwg system user with only CAP_NET_ADMIN.
+  * License webwg under MIT.
   * Use Bootstrap Icons in place of Font Awesome Pro, so the build needs no
     private npm registry and the package holds no commercial fonts.
 

@@ -4,9 +4,8 @@ Upstream-Contact: Matthew Shaw <mshaw.cx@gmail.com>
 Source: https://github.com/shawcx/webwg
 
 Files: *
-Copyright: 2015-2026 Matthew Shaw <mshaw.cx@gmail.com>
-License: TBD
- A license has not been chosen yet.
+Copyright: 2024-2026 Matthew Shaw <mshaw.cx@gmail.com>
+License: Expat
 
 Files: webwg/static/fonts/ibm-plex-*
 Copyright: 2017 IBM Corp.
@@ -16,12 +15,12 @@ License: OFL-1.1
 
 Files: webwg/static/fonts/bootstrap-icons.woff2
 Copyright: 2019-2024 The Bootstrap Authors
-License: MIT
+License: Expat
 
 Files: webwg/static/css/*
 Copyright: The Bootstrap Authors (Bootstrap, Bootstrap Icons)
 Comment: The stylesheet also holds webwg's own styles, covered by the first stanza.
-License: MIT
+License: Expat
 
 Files: webwg/static/js/*
 Copyright: OpenJS Foundation and other contributors (jQuery)
@@ -30,9 +29,9 @@ Copyright: OpenJS Foundation and other contributors (jQuery)
            Floating UI contributors (Popper)
            Kazuhiko Arase (qrcode-generator)
 Comment: The bundled scripts also hold webwg's own code, covered by the first stanza.
-License: MIT
+License: Expat
 
-License: MIT
+License: Expat
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
