@@ -24,6 +24,13 @@ class Socket(_.websockets.Protected):
         self.write_message(msg)
 
 
+class Join(_.handlers.Handler):
+    'public page where a device requests access, its keys are made in the browser'
+    async def get(self):
+        servers = await _.sqlite.find(_.data.servers)
+        self.render('join.html', servers=[server.instance for server in servers])
+
+
 class QR(_.handlers.Protected):
     @_.auth.protected
     async def get(self, pub=None):

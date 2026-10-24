@@ -25,8 +25,11 @@ class pending:
 class PendingHandler(_.records.HandlerInterface):
 # comes in from the cliwg.py client
     async def post(self, pending_id):
-        agent = self.request.headers.get('User-Agent', None)
-        if agent != 'cliwg':
+        # cliwg.py sends its own agent and the join page a custom header, which
+        # a browser on another site can't send without a CORS preflight
+        agent  = self.request.headers.get('User-Agent', None)
+        client = self.request.headers.get('X-WebWG-Client', None)
+        if agent != 'cliwg' and client != 'join':
             raise _.HTTPError(500)
 
         try:

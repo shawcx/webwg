@@ -37,6 +37,7 @@ class WebWg(_.WebApplication):
 
         self.patterns = [
             ( r'/qr/(.*)',  webwg.handlers.QR         ),
+            ( r'/join',     webwg.handlers.Join       ),
             ( r'/ws',       webwg.handlers.Socket, { 'websockets' : self.websockets } ),
             ( r'/([a-z]*)', _.handlers.Protected ),
             ]
