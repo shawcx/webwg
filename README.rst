@@ -133,6 +133,11 @@ is in ``webwg/wireguard.py``. Managing interfaces needs ``CAP_NET_ADMIN``.
 Without it the pages still work, and creating a server reports the missing
 permission.
 
+``docs/screenshot.sh`` retakes the screenshot above from a live demo, with
+real tunnels to four devices in private network namespaces. It needs no root,
+only unprivileged user namespaces, plus wireguard-tools, Chrome or Chromium
+and Node 22 or later.
+
 License
 -------
 
