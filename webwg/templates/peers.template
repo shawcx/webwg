@@ -1,134 +1,120 @@
-<div class="card">
-  <h2 class="card-header">
-    <i class="fa-regular fa-fw fa-computer"></i> Peers
-    <a class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#peer-modal"><i class="fa-regular fa-plus"></i></a>
-  </h2>
-  <div class="card-body">
-    <table class="table table-hover" id="peers-table">
-      <thead>
-        <tr>
-          <th scope="col">Name</th>
-          <th scope="col">Instance</th>
-          <th scope="col">Address</th>
-          <th scope="col">Rx</th>
-          <th scope="col">Tx</th>
-          <th scope="col">Date</th>
-          <th scope="col" style="width: 0px;"></th>
-        </tr>
-      </thead>
-      <tbody class="table-group-divider">
-      </tbody>
-    </table>
+<script type="text/template" id="t-req-row">
+  <div class="wg-req-who">
+    <span class="wg-req-name"><%- name %></span>
+    <span class="wg-req-meta">Requested <%- when %> from <span class="font-monospace"><%- ip %></span></span>
   </div>
-</div>
+  <div class="wg-req-field">
+    <span class="wg-label">Address</span>
+    <span class="font-monospace"><%- address %></span>
+  </div>
+  <div class="wg-req-actions">
+    <button type="button" class="btn btn-quiet text-danger reject-req">Reject</button>
+    <button type="button" class="btn btn-primary approve-req">
+      <i class="fa-regular fa-check" aria-hidden="true"></i> Approve
+    </button>
+  </div>
+</script>
 
 <script type="text/template" id="t-peer-row">
-  <td>
-  <% if(has_config) { %>
-      <a href="javascript:void(0);" title="<%- pub %>" class="peer-row-name"><%- name %></a></td>
-  <% } else { %>
-      <span title="<%- pub %>"><%- name %></span></td>
-  <% } %>
-  <td><%- instance %></td>
-  <td><%- address %></td>
-  <td><%- rx %> <small><%- rs %></small></td>
-  <td><%- tx %> <small><%- ts %></small></td>
-  <td>
-    <% if(created) { %>
-    <%- new Date(created).short() %></td>
-    <% } else { %>
-    -
+  <td class="wg-status-<%- status %>"<% if (endpoint) { %> title="Connected from <%- endpoint %>"<% } %>><span class="wg-dot" aria-hidden="true"></span><%- statusLabel %></td>
+  <td class="fw-semibold" title="<%- pub %>"><%- name %></td>
+  <td class="font-monospace"><%- address %></td>
+  <td class="wg-dim"><%- handshakeLabel %></td>
+  <td class="text-end wg-num"><%- rxLabel %></td>
+  <td class="text-end wg-num"><%- txLabel %></td>
+  <td class="wg-dim"><%- added %></td>
+  <td class="wg-actions">
+    <% if (has_config) { %>
+    <button type="button" class="btn btn-link show-config">
+      <i class="fa-regular fa-qrcode" aria-hidden="true"></i> Show config
+    </button>
     <% } %>
-  <td><a href="#" class="float-end link-danger del-row"><i class="fa-regular fa-fw fa-trash-can"></i></a></td>
+    <button type="button" class="wg-icon-btn del-row" aria-label="Remove <%- name %>">
+      <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+    </button>
+  </td>
 </script>
 
 <div class="modal fade" id="peer-modal" tabindex="-1" aria-labelledby="peer-modal-label" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="peer-modal-label">New Peer</h5>
+        <h2 class="modal-title" id="peer-modal-label">New peer</h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form class="webwg-form" id="peer-new">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <span class="input-group-text webwg-label">Name</span>
-                <input type="text" class="form-control" id="peer-name" name="name" placeholder="Peer Name" aria-label="Peer Name" required>
-              </div>
-            </div>
+        <form class="wg-form" id="peer-new" novalidate>
+          <div>
+            <label for="peer-name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="peer-name" name="name" required maxlength="32" pattern="[A-Za-z0-9_.\-]+" aria-describedby="peer-name-hint">
+            <div class="form-text" id="peer-name-hint">Letters, numbers, dots, dashes and underscores.</div>
           </div>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <span class="input-group-text webwg-label">Instance</span>
-                <select class="form-select" id="peer-instance" name="instance"></select>
-              </div>
-            </div>
+          <div>
+            <label for="peer-instance" class="form-label">Server</label>
+            <select class="form-select" id="peer-instance" name="instance"></select>
           </div>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <span class="input-group-text webwg-label">Address</span>
-                <input type="text" class="form-control" id="peer-address" name="address" placeholder="Address" aria-label="Network" required>
-                <span class="input-group-text">/24</span>
-              </div>
+          <div>
+            <label for="peer-address" class="form-label">Address</label>
+            <div class="input-group">
+              <input type="text" class="form-control font-monospace" id="peer-address" name="address" required pattern="[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" aria-describedby="peer-address-hint">
+              <span class="input-group-text font-monospace">/32</span>
             </div>
+            <div class="form-text" id="peer-address-hint"></div>
           </div>
+          <p class="wg-note">
+            <i class="fa-regular fa-circle-info" aria-hidden="true"></i>
+            <span>WebWG generates this peer's keys. You'll see its config once, as a QR code and text, right after you create it.</span>
+          </p>
+          <div class="alert alert-danger" id="peer-error" role="alert" hidden></div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary" form="peer-new" id="peer-save">Save</button>
+        <button type="button" class="btn btn-quiet" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" form="peer-new">Create peer</button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="qr-modal" tabindex="-1" aria-labelledby="qr-modal-label" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+<div class="modal fade" id="config-modal" tabindex="-1" aria-labelledby="config-title" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">QR <span id="modal-title-qr"></span></h5>
+        <div class="d-flex flex-column gap-1">
+          <h2 class="modal-title" id="config-title"><span id="config-name"></span> is ready</h2>
+          <span class="wg-muted" id="config-meta"></span>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body" id="qr-modal-body">
-        <div class="text-center" id="qr-img"></div>
-        <pre id="qr-config"></pre>
+      <div class="modal-body d-flex flex-column gap-4">
+        <p class="wg-note wg-note-warn" role="note">
+          <i class="fa-regular fa-triangle-exclamation" aria-hidden="true"></i>
+          <span>This config holds the peer's private key and is shown only once. WebWG has already deleted its copy.</span>
+        </p>
+        <div class="wg-config-top">
+          <img id="config-qr" alt="">
+          <ol>
+            <li>Open the WireGuard app on the device.</li>
+            <li>Add a tunnel and scan this code, or import the downloaded file.</li>
+            <li>Turn the tunnel on. Its status changes to Online here after the first handshake.</li>
+          </ol>
+        </div>
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex align-items-center justify-content-between gap-2">
+            <span class="fw-medium">Config</span>
+            <button type="button" class="btn btn-quiet" id="config-copy">
+              <i class="fa-regular fa-copy" aria-hidden="true"></i> <span class="label">Copy</span>
+            </button>
+          </div>
+          <pre class="wg-code" id="config-text"></pre>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-quiet" id="config-download">
+          <i class="fa-regular fa-download" aria-hidden="true"></i> <span id="config-download-label">Download</span>
+        </a>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
       </div>
     </div>
   </div>
 </div>
-
-<div class="card">
-  <h2 class="card-header"><i class="fa-regular fa-fw fa-thumbs-up"></i> Pending</h2>
-  <div class="card-body">
-    <table class="table table-hover" id="pending-table">
-      <thead>
-        <tr>
-          <th scope="col">Name</th>
-          <th scope="col">Instance</th>
-          <th scope="col">Address</th>
-          <th scope="col">Client</th>
-          <th scope="col">Date</th>
-          <th scope="col" style="width: 0px;"></th>
-          <th scope="col" style="width: 0px;"></th>
-        </tr>
-      </thead>
-      <tbody class="table-group-divider">
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<script type="text/template" id="t-req-row">
-  <td><a href="#" title="<%- pub %>"><%- name %></a></td>
-  <td><%- instance %></td>
-  <td><%- address %></td>
-  <td><%- ip %></td>
-  <td><%- new Date(created).short() %></td>
-  <td><a href="#" class="float-end link-success approve-req"><i class="fa-regular fa-fw fa-check-circle"></i></a></td>
-  <td><a href="#" class="float-end link-danger del-row"><i class="fa-regular fa-fw fa-trash-can"></i></a></td>
-</script>
-

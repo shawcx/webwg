@@ -2,17 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=0.5">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="WebWG">
   <title>WebWG</title>
   <link rel="icon"       type="image/x-icon" href="/static/favicon.ico">
   <link rel="stylesheet" type="text/css"     href="/static/css/webwg.css" />
 </head>
 <body>
-  <div class="container">
 {% block body %}{% end %}
-  </div>
 </body>
 {% block scripts %}{% end %}
 </html>

@@ -42,8 +42,7 @@ class WebWg(_.WebApplication):
             ( r'/([a-z]*)', _.handlers.Protected ),
             ]
 
-        #self.status_task  = self.periodic(10, self.status)
-        #self.status_task.cancel()
+        self.status_task = self.periodic(10, self.status)
 
     async def on_stop(self):
         for server in await _.sqlite.find(_.data.servers):
@@ -55,7 +54,29 @@ class WebWg(_.WebApplication):
             ws.write_message(msg)
 
     async def status(self):
-        logging.info('Periodic: %s', time.ctime())
+        'broadcast handshake and transfer details for the peers of our interfaces'
+        if not self.websockets:
+            return
+
+        interfaces = set(self.interfaces.values())
+        status = collections.defaultdict(list)
+        # peer lines have 9 tab separated fields, interface lines have 5 and
+        # hold the private key, the preshared key field is never sent on
+        for line in self.wg('show', 'all', 'dump').splitlines():
+            fields = line.split('\t')
+            if len(fields) != 9 or fields[0] not in interfaces:
+                continue
+            interface, pub, psk, endpoint, allowed, handshake, rx, tx, keepalive = fields
+            status[interface].append(dict(
+                pub       = pub,
+                endpoint  = None if endpoint == '(none)' else endpoint,
+                handshake = int(handshake),
+                rx        = int(rx),
+                tx        = int(tx),
+                ))
+
+        if status:
+            await self.broadcast(dict(action='status', now=int(time.time()), status=status))
 
     async def on_dblogin_add_user(self, name, user):
         'make adjustments to the record before calling sql statement'

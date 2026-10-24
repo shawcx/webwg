@@ -5,6 +5,11 @@ var _         = require('underscore')
 var Backbone  = require('backbone')
 var bootstrap = require('bootstrap')
 
+var util      = require('../util.js')
+
+// a peer that shook hands within this many seconds counts as online
+var ONLINE = 180
+
 
 class Peers {
     static Model = Backbone.Model.extend({
@@ -31,32 +36,105 @@ class Peers {
         urlRoot:     '/qr/',
     })
 
+    // status and labels for a peer row, handshake is unset until the server reports it
+    static present(peer) {
+        if (peer.handshake === undefined) {
+            peer.status         = 'unknown'
+            peer.statusLabel    = 'Unknown'
+            peer.handshakeLabel = '—'
+            peer.rxLabel        = '—'
+            peer.txLabel        = '—'
+        } else {
+            let age = util.now() / 1000 - peer.handshake
+            if (!peer.handshake) {
+                peer.status      = 'fresh'
+                peer.statusLabel = 'No handshake yet'
+            } else if (age < ONLINE) {
+                peer.status      = 'online'
+                peer.statusLabel = 'Online'
+            } else {
+                peer.status      = 'idle'
+                peer.statusLabel = 'Idle'
+            }
+            peer.handshakeLabel = peer.handshake ? util.ago(peer.handshake * 1000) : 'Never'
+            peer.rxLabel        = util.bytes(peer.rx)
+            peer.txLabel        = util.bytes(peer.tx)
+        }
+        peer.endpoint = peer.endpoint || ''
+        peer.added    = util.short(peer.created)
+        return peer
+    }
+
+    // a peer's one time config, the server forgets it once fetched
+    static showConfig(model) {
+        let qr = new Peers.QR({pub: model.get('pub')})
+        qr.fetch({
+            success: (qr) => Peers.config(model.toJSON(), qr.get('png'), qr.get('config')),
+            error:   () => model.set('has_config', false),
+        })
+    }
+
+    static config(peer, png, config) {
+        let el       = document.getElementById('config-modal')
+        let download = document.getElementById('config-download')
+        let copy     = document.getElementById('config-copy')
+
+        $('#config-name').text(peer.name)
+        $('#config-meta').text(`${peer.instance} · ${peer.address}`)
+        $('#config-qr').attr({src: png, alt: `QR code of the ${peer.name} config`})
+        $('#config-text').text(config)
+
+        let url = URL.createObjectURL(new Blob([config], {type: 'text/plain'}))
+        download.href     = url
+        download.download = `${peer.instance}-${peer.name}.conf`
+        $('#config-download-label').text(`Download ${download.download}`)
+
+        copy.onclick = async () => util.flash(copy, await util.copy(config))
+
+        // drop the private key from the page once the dialog closes
+        el.addEventListener('hidden.bs.modal', () => {
+            URL.revokeObjectURL(url)
+            download.removeAttribute('href')
+            $('#config-text').text('')
+            $('#config-qr').attr({src: '', alt: ''})
+        }, {once: true})
+
+        bootstrap.Modal.getOrCreateInstance(el).show()
+    }
+
+    // the peers table, only the current server's peers
     static View = Backbone.View.extend({
-        el: function() { return $('#peers-table') },
+        el: function() { return $('#peers-card') },
 
         initialize: function(options) {
-            _.bindAll(this, 'Add')
-
+            this.app    = options.app
+            this.rows   = []
             this.$tbody = this.$('tbody')
 
-            this.listenTo(this.collection, 'add',   this.Add)
-            this.listenTo(this.collection, 'reset', function(models) {
-                this.$tbody.empty()
-                models.each((model) => {
-                    this.Add(model)
-                    return
-                })
-            })
+            this.listenTo(this.collection, 'add remove reset change:instance', this.render)
+            this.listenTo(this.app.state,  'change:instance', this.render)
+            this.listenTo(this.app.state,  'tick',            this.tick)
 
             return this
         },
 
-        Add: function(model) {
-            let entry = new Peers.Row({
-                id: "peer_row_${ model.id }",
-                model: model,
-                })
-            this.$tbody.append(entry.$el)
+        render: function() {
+            let instance = this.app.state.get('instance')
+            let models   = this.collection.where({instance: instance})
+            models = _.sortBy(models, (model) => util.octets(model.get('address')))
+
+            _.invoke(this.rows, 'remove')
+            this.rows = models.map((model) => new Peers.Row({model: model}))
+            this.$tbody.append(this.rows.map((row) => row.el))
+
+            this.$('#peers-count').text(models.length)
+            this.$('#peers-wrap').prop('hidden', !models.length)
+            this.$('#peers-empty').prop('hidden', !!models.length)
+            return this
+        },
+
+        tick: function() {
+            _.invoke(this.rows, 'render')
         },
     })
 
@@ -64,162 +142,117 @@ class Peers {
         tagName: 'tr',
 
         events: {
-            'click .peer-row-name' : 'onQR',
-            'click .del-row'       : 'onDelete',
+            'click .show-config' : 'onConfig',
+            'click .del-row'     : 'onDelete',
         },
 
         initialize: function(options) {
-            _.bindAll(this, 'render')
-
             this.template = Templates['peer-row']
-
+            this.listenTo(this.model, 'change', this.render)
             this.render()
-
-            this.listenTo(this.model, 'change',  this.render)
-            this.listenTo(this.model, 'remove',  this.remove)
-            this.listenTo(this.model, 'destroy', this.remove)
-
             return this
-        },
-
-        mapping: {
-             0: 'B',
-             3: 'KB',
-             6: 'MB',
-             9: 'GB',
-            12: 'TB',
-        },
-
-        log10: function(num) {
-            let count = 0
-            while(num > Math.pow(10,count)) {
-                count += 3
-            }
-            return Math.max(0, count-3)
-        },
-
-        human: function(num, count) {
-            return (num / Math.pow(10,count)).toFixed(2)
         },
 
         render: function() {
-            let model = this.model.toJSON()
-
-            let count = 0
-            count = this.log10(model.rx)
-            model.rx = this.human(model.rx, count)
-            model.rs = this.mapping[count]
-            count = this.log10(model.tx)
-            model.tx = this.human(model.tx, count)
-            model.ts = this.mapping[count]
-
-            this.$el.html(this.template(model))
+            let html = this.template(Peers.present(this.model.toJSON()))
+            // status arrives every few seconds, only redraw on a real change so focus survives
+            if (html !== this.html) {
+                this.$el.html(html)
+                this.html = html
+            }
             return this
         },
 
-        onQR: function(event) {
-            let qr = new Peers.QR({pub: this.model.get('pub')})
-            qr.fetch({
-                success: (qr) => {
-                    $('#modal-title-qr').text(this.model.id)
-                    $('#qr-img').html(`<img src="${qr.get('png')}" />`)
-                    $('#qr-config').text(qr.get('config'))
-                    let modal = new bootstrap.Modal('#qr-modal')
-                    modal.show()
-                }
-            })
+        onConfig: function(event) {
+            Peers.showConfig(this.model)
         },
 
-        onDelete: function (event) {
-            this.model.destroy({wait: true})
-            event.stopPropagation()
-            return false
-        },
-    })
-
-    static Instances = Backbone.View.extend({
-        el: function() { return $('#peer-instance') },
-
-        events: {
-            'change' : 'onChange',
-        },
-
-        initialize: function(options) {
-            _.bindAll(this, 'render')
-
-            this.listenTo(this.collection, 'add',    this.Add)
-            this.listenTo(this.collection, 'remove', this.Remove)
-            this.listenTo(this.collection, 'reset',  function(models) {
-                models.each((model) => {
-                    this.Add(model)
-                    return
-                })
-            })
-
-            return this
-        },
-
-        //render: function() {
-        //    return this
-        //},
-
-        Add: function(model) {
-            this.$el.append($(`<option value="${model.id}">${model.id}</option>`))
-        },
-
-        Remove: function (model) {
-            //console.log('Removed', model.id, model.toJSON())
-        },
-
-        onChange: function (event) {
-            //console.log('Selected:', this.el.value)
+        onDelete: function(event) {
+            let name = this.model.id
+            util.confirm(
+                `Remove ${name}?`,
+                `${name} loses access to ${this.model.get('instance')} right away. Bringing it back takes a new config.`,
+                'Remove peer',
+                () => this.model.destroy({wait: true}),
+                )
         },
     })
 
     static ModalView = Backbone.View.extend({
-        el: function() {
-            return $('#peer-modal')
-        },
+        el: function() { return $('#peer-modal') },
 
         events: {
-            'submit' : 'onSubmit',
+            'submit'                : 'onSubmit',
+            'change #peer-instance' : 'suggest',
         },
 
         initialize: function(options) {
-            this.el.addEventListener('show.bs.modal', this.onShow)
+            this.app  = options.app
+            this.form = this.$('form')[0]
+            this.el.addEventListener('show.bs.modal', this.onShow.bind(this))
             return this
         },
 
-        onShow: event => {
-            return
+        onShow: function(event) {
+            this.form.reset()
+            let select = this.$('#peer-instance').empty()
+            this.app.servers.each((server) => {
+                select.append($('<option>').val(server.id).text(`${server.id} · ${server.get('type')} · ${util.subnet(server.get('network'))}`))
+            })
+            select.val(this.app.state.get('instance') || select.find('option').first().val())
+            this.suggest()
+            util.error(this.$('#peer-error')[0], null)
+        },
+
+        // the next address no peer or request on that server has
+        suggest: function() {
+            let server = this.app.servers.get(this.form.instance.value)
+            if (!server) {
+                return
+            }
+            let taken = new Set()
+            for (const record of this.app.peers.where({instance: server.id}).concat(this.app.pending.where({instance: server.id}))) {
+                taken.add(record.get('address'))
+            }
+            this.form.address.value = util.nextAddress(server.get('network'), taken)
+            this.$('#peer-address-hint').text(`Next free address on ${server.id}.`)
         },
 
         onSubmit: function(event) {
-            let values = {}
-            $('#peer-new :input').each(function() {
-                values[this.name] = $(this).val();
-            })
+            event.preventDefault()
+            event.stopPropagation()
 
-            console.log('------------')
-            console.log(values)
-            console.log('------------')
+            let error = this.$('#peer-error')[0]
+            if (!this.form.checkValidity()) {
+                this.form.reportValidity()
+                return false
+            }
 
-            let onSuccess = (function(model) {
-                let modal = bootstrap.Modal.getInstance(this.el)
-                modal.hide()
-                return
-            }).bind(this);
+            let values = {
+                name     : this.form.elements['name'].value.trim(),
+                instance : this.form.instance.value,
+                address  : this.form.address.value.trim(),
+            }
+
+            if (this.collection.get(values.name) || this.app.pending.get(values.name)) {
+                util.error(error, `A peer named "${values.name}" already exists.`)
+                return false
+            }
 
             let peer = new Peers.Model()
             peer.save(values, {
                 wait: true,
-                success: onSuccess
-                }
-            )
-            event.preventDefault()
-            event.stopPropagation()
+                success: (model) => {
+                    this.collection.add(model.toJSON(), {merge: true})
+                    util.hide(this.el)
+                    Peers.showConfig(this.collection.get(values.name))
+                },
+                error: (model, xhr) => {
+                    util.error(error, util.failure(xhr, `A peer named "${values.name}" already exists.`))
+                },
+            })
             return false
-        }
+        },
     })
 }
 

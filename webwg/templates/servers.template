@@ -1,111 +1,153 @@
-<div class="card">
-  <h2 class="card-header">
-    <i class="fa-regular fa-fw fa-network-wired"></i> Server
-    <a class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#server-modal"><i class="fa-regular fa-plus"></i></a>
-  </h2>
-  <div class="card-body">
-    <table class="table table-hover" id="servers-table">
-      <thead>
-        <tr>
-          <th scope="col">Instance</th>
-          <th scope="col">Type</th>
-          <th scope="col">Interface</th>
-          <th scope="col">Network</th>
-          <th scope="col">Host</th>
-          <th scope="col">MTU</th>
-          <th scope="col">Peers</th>
-          <th scope="col" style="width: 0px;"></th>
-        </tr>
-      </thead>
-      <tbody class="table-group-divider">
-      <!-- added via Javascript -->
-      </tbody>
-    </table>
-  </div>
-</div>
+<script type="text/template" id="t-server-nav">
+  <a class="wg-nav-link wg-nav-server" href="#servers/<%- encodeURIComponent(instance) %>"<% if (current) { %> aria-current="page"<% } %>>
+    <span class="d-flex flex-column min-w-0">
+      <span class="wg-nav-name"><%- instance %></span>
+      <span class="wg-nav-meta"><%- subnet %> · <%- type %></span>
+    </span>
+    <% if (waiting) { %>
+    <span class="wg-count wg-count-warn" aria-label="<%- waiting %> waiting for approval"><%- waiting %></span>
+    <% } %>
+  </a>
+</script>
 
-<script type="text/template" id="t-server-row">
-  <td><a href="#" title="<%- pub %>"><%- instance %></a></td>
-  <td><%- type %></td>
-  <td><%- interface %></td>
-  <td><%- network %>/24</td>
-  <td><%- host %>:<%- port %></td>
-  <td><%- mtu %></td>
-  <td>-</td>
-  <td><a href="#" class="link-danger del-row"><i class="fa-regular fa-trash-can"></i></a></td>
+<script type="text/template" id="t-server-detail">
+  <header class="wg-header">
+    <div class="d-flex flex-column gap-2 min-w-0">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <h1 class="wg-title"><%- instance %></h1>
+        <span class="wg-badge wg-badge-<%- type %>"><%- typeLabel %></span>
+        <span class="font-monospace wg-muted"><%- interface %></span>
+      </div>
+      <p class="wg-subtitle"><i class="fa-regular fa-fw <%- icon %>" aria-hidden="true"></i><%- note %></p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <button type="button" class="btn btn-quiet text-danger del-server">
+        <i class="fa-regular fa-trash-can" aria-hidden="true"></i> Delete server
+      </button>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#peer-modal">
+        <i class="fa-regular fa-plus" aria-hidden="true"></i> New peer
+      </button>
+    </div>
+  </header>
+  <section class="card" aria-label="Server details">
+    <div class="card-body">
+      <dl class="wg-details">
+        <div>
+          <dt>Network</dt>
+          <dd class="font-monospace"><%- subnet %></dd>
+        </div>
+        <div>
+          <dt>Server address</dt>
+          <dd class="font-monospace"><%- network %></dd>
+        </div>
+        <div>
+          <dt>Endpoint</dt>
+          <dd class="font-monospace"><%- host %>:<%- port %></dd>
+        </div>
+        <div>
+          <dt>MTU</dt>
+          <dd class="font-monospace"><%- mtu %></dd>
+        </div>
+        <div>
+          <dt>Peers</dt>
+          <dd class="fw-medium peer-summary"></dd>
+        </div>
+      </dl>
+      <div class="wg-key-row">
+        <span class="wg-key-label">Public key</span>
+        <span class="wg-key font-monospace"><%- pub %></span>
+        <button type="button" class="wg-icon-btn copy-key" aria-label="Copy the public key of <%- instance %>">
+          <i class="fa-regular fa-copy" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </section>
 </script>
 
 <div class="modal fade" id="server-modal" tabindex="-1" aria-labelledby="server-modal-label" aria-hidden="true">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="server-modal-label">New Server</h5>
+        <h2 class="modal-title" id="server-modal-label">New server</h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form class="webwg-form" id="server-new">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <span class="input-group-text webwg-label">Type</span>
-                <select class="form-select" id="server-type" name="type">
-                  <option value="hub"  > Hub      </option>
-                  <option value="proxy"> Proxy    </option>
-                  <option value="isolated"> Isolated </option>
-                </select>
-              </div>
+        <form class="wg-form" id="server-new" novalidate>
+          <fieldset class="wg-choices">
+            <legend>Type</legend>
+            <label class="wg-choice">
+              <input type="radio" name="type" value="hub" checked>
+              <span class="wg-choice-text">
+                <strong>Hub</strong>
+                Peers reach the server and each other. Turns on forwarding for this interface only.
+              </span>
+            </label>
+            <label class="wg-choice">
+              <input type="radio" name="type" value="isolated">
+              <span class="wg-choice-text">
+                <strong>Isolated</strong>
+                Peers reach the server only, never each other.
+              </span>
+            </label>
+            <label class="wg-choice">
+              <input type="radio" name="type" value="proxy" disabled>
+              <span class="wg-choice-text">
+                <strong>Proxy</strong>
+                Route peers out to the internet. Not available yet.
+              </span>
+            </label>
+          </fieldset>
+
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label for="server-instance" class="form-label">Name</label>
+              <input type="text" class="form-control" id="server-instance" name="instance" placeholder="home" required maxlength="32" pattern="[A-Za-z0-9_.\-]+" aria-describedby="server-instance-hint">
+              <div class="form-text" id="server-instance-hint">Devices pick it with <span class="font-monospace">-i</span>.</div>
+            </div>
+            <div class="col-sm-6">
+              <label for="server-interface" class="form-label">Interface</label>
+              <input type="text" class="form-control font-monospace" id="server-interface" name="interface" required maxlength="15" pattern="[A-Za-z0-9_=+.\-]+">
             </div>
           </div>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <span class="input-group-text webwg-label">Instance</span>
-                <input type="text" class="form-control" id="instance" name="instance" placeholder="Instance Name" aria-label="Instance Name" required>
+
+          <div>
+            <span class="form-label d-block" id="server-endpoint">Public endpoint</span>
+            <div class="row g-2" role="group" aria-labelledby="server-endpoint" aria-describedby="server-endpoint-hint">
+              <div class="col">
+                <input type="text" class="form-control font-monospace" id="server-host" name="host" aria-label="Host" placeholder="vpn.example.com" required>
+              </div>
+              <div class="col-4">
+                <input type="text" class="form-control font-monospace" id="server-port" name="port" aria-label="Port" inputmode="numeric" required pattern="[0-9]+">
               </div>
             </div>
+            <div class="form-text" id="server-endpoint-hint">Where devices connect. Goes into every peer config.</div>
           </div>
-          <div class="row">
-            <div class="col-md-12">
+
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label for="server-network" class="form-label">Server address</label>
               <div class="input-group">
-                <span class="input-group-text webwg-label">Interface</span>
-                <input type="text" class="form-control" id="interface" name="interface" value="wg0" placeholder="Interface" aria-label="Interface">
+                <input type="text" class="form-control font-monospace" id="server-network" name="network" required pattern="[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+">
+                <span class="input-group-text font-monospace">/24</span>
               </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <span class="input-group-text webwg-label">Host</span>
-                <input type="text" class="form-control" id="host" name="host" placeholder="Host" aria-label="Host">
-                <span class="input-group-text">:</span>
-                <input type="text" class="form-control" id="port" name="port" placeholder="Port" aria-label="Port">
-              </div>
+            <div class="col-sm-6">
+              <label for="server-mtu" class="form-label">MTU</label>
+              <input type="text" class="form-control font-monospace" id="server-mtu" name="mtu" value="1280" inputmode="numeric" required pattern="[0-9]+">
             </div>
           </div>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <span class="input-group-text webwg-label">Network</span>
-                <input type="text" class="form-control" id="network" name="network" value="10.8.0.1" placeholder="Subnet" aria-label="Network">
-                <span class="input-group-text">/24</span>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <span class="input-group-text webwg-label">MTU</span>
-                <input type="text" class="form-control" id="mtu" name="mtu" value="1280" placeholder="MTU" aria-label="MTU">
-              </div>
-            </div>
-          </div>
+
+          <p class="wg-note">
+            <i class="fa-regular fa-lock" aria-hidden="true"></i>
+            <span>WebWG generates the server's key pair. The private key stays on this machine.</span>
+          </p>
+          <div class="alert alert-danger" id="server-error" role="alert" hidden></div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary" form="server-new" id="server-save">Save</button>
+        <button type="button" class="btn btn-quiet" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" form="server-new">Create server</button>
       </div>
     </div>
   </div>
 </div>
-

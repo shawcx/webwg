@@ -26,11 +26,22 @@ SASS_FLAGS = -I ./node_modules/@fortawesome/fontawesome-pro/scss \
 WEBFONTS_SRC = ./node_modules/@fortawesome/fontawesome-pro/webfonts
 WEBFONTS = $(STATIC_ROOT)/webfonts
 
-all: node_modules $(JS_OUT) $(JOIN_OUT) $(CSS_OUT) $(WEBFONTS) $(CLIWG_OUT)
+# latin IBM Plex, served from here so pages need nothing outside this server
+PLEX      = ./node_modules/@fontsource/ibm-plex
+FONTS_SRC = $(addprefix $(PLEX)-sans/files/ibm-plex-sans-latin-,400-normal.woff2 500-normal.woff2 600-normal.woff2) \
+            $(addprefix $(PLEX)-mono/files/ibm-plex-mono-latin-,400-normal.woff2 500-normal.woff2)
+FONTS     = $(STATIC_ROOT)/fonts
+
+all: node_modules $(JS_OUT) $(JOIN_OUT) $(CSS_OUT) $(WEBFONTS) $(FONTS) $(CLIWG_OUT)
 	@#
 
 $(WEBFONTS): $(WEBFONTS_SRC)
 	@cp -r $(WEBFONTS_SRC) $(STATIC_ROOT)
+
+$(FONTS): $(FONTS_SRC)
+	@mkdir -p $@
+	@cp $^ $@
+	@touch $@
 
 node_modules:
 	@npm install .
@@ -57,4 +68,5 @@ distclean: clean
 	@rm -vf $(JS_OUT)
 	@rm -vf $(JOIN_OUT)
 	@rm -vf $(CLIWG_OUT)
+	@rm -rvf $(FONTS)
 	@rm -rf node_modules

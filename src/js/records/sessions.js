@@ -4,6 +4,13 @@ var $        = require('jquery')
 var _        = require('underscore')
 var Backbone = require('backbone')
 
+var util     = require('../util.js')
+
+var methods = {
+    'Database' : 'Password',
+    'GitLab'   : 'GitLab',
+}
+
 
 class Sessions {
     static Model = Backbone.Model.extend({
@@ -20,30 +27,24 @@ class Sessions {
     })
 
     static View = Backbone.View.extend({
-        el: function() { return $('#sessions-table') },
+        el: function() { return $('#sessions-card') },
 
         initialize: function() {
-            _.bindAll(this, 'Add')
-
+            this.rows   = []
             this.$tbody = this.$('tbody')
 
-            this.listenTo(this.collection, 'add',   this.Add)
-            this.listenTo(this.collection, 'reset', function(models) {
-                this.$tbody.empty()
-                models.forEach((model) => {
-                    this.Add(model)
-                }, this)
-            })
+            this.listenTo(this.collection, 'add remove reset', this.render)
 
             return this
         },
 
-        Add: function(model) {
-            let entry = new Sessions.Row({
-                id: `session_row_${ model.id }`,
-                model: model,
-                })
-            this.$tbody.append(entry.$el)
+        render: function() {
+            let models = this.collection.sortBy((model) => -model.get('time'))
+            _.invoke(this.rows, 'remove')
+            this.rows = models.map((model) => new Sessions.Row({model: model}))
+            this.$tbody.append(this.rows.map((row) => row.el))
+            this.$('#sessions-count').text(models.length)
+            return this
         },
     })
 
@@ -56,29 +57,28 @@ class Sessions {
 
         initialize: function(options) {
             this.template = Templates['session-row']
-
+            this.listenTo(this.model, 'change', this.render)
             this.render()
-
-            this.listenTo(this.model, 'change',  this.render)
-            this.listenTo(this.model, 'remove',  this.remove)
-            this.listenTo(this.model, 'destroy', this.remove)
-
             return this
         },
 
         render: function() {
-            let model = this.model.toJSON()
-            this.$el.html(this.template(model))
-            if (model.id == current_user.id) {
-                this.$el.addClass('table-light webwg-hilite')
-            }
+            let session = this.model.toJSON()
+            session.agent    = session.agent || ''
+            session.method   = methods[session.auth] || session.auth
+            session.browser  = util.browser(session.agent)
+            session.signedIn = util.short(session.time)
+            session.you      = session.session_id === current_user.session_id
+            this.$el.html(this.template(session))
             return this
         },
 
-        onDelete: function (event) {
-            this.model.destroy({wait: true})
-            event.stopPropagation()
-            return false
+        onDelete: function(event) {
+            this.$('button').prop('disabled', true)
+            this.model.destroy({
+                wait:  true,
+                error: () => this.$('button').prop('disabled', false),
+            })
         },
     })
 }

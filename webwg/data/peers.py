@@ -80,9 +80,11 @@ class PeersHandler(_.records.HandlerInterface):
         self.application.add_peer(peer)
 
         peer = peer._as_dict()
+        peer.pop('psk')
         peer['has_config'] = True
 
-        self.set_status(204)
+        # the creator needs the public key to fetch the config right away
+        self.write(peer)
         await self.application.broadcast(dict(action='add', collection='peers', data=peer))
 
     @_.auth.protected

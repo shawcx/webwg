@@ -6,16 +6,167 @@
 {% end %}
 
 {% block body %}
-  <div class="card text-bg-dark">
-    <h2 class="card-header">
-      <img src="/static/images/wg.png" alt="WebWG" />
-      <span class="float-end">
-      <small><i class="fa-regular fa-fw fa-user"></i>{{ current_user['username'] }}</small>
-      <a class="btn btn-warning" href="/logout" title="Logout"><i class="fa-regular fa-fw fa-right-from-bracket"></i></a>
-      </span>
-    </h2>
+<div class="wg-app">
+  <nav class="wg-sidebar" aria-label="Main">
+    <div class="wg-brand">
+      <div class="wg-logo" aria-hidden="true">wg</div>
+      <div class="d-flex flex-column">
+        <span class="wg-brand-name">WebWG</span>
+        <span class="wg-brand-host">{{ request.host }}</span>
+      </div>
+    </div>
+
+    <div class="d-flex flex-column gap-1">
+      <h2 class="wg-nav-heading" id="nav-servers">Servers</h2>
+      <ul class="wg-nav" id="server-nav" aria-labelledby="nav-servers"></ul>
+      <button type="button" class="wg-nav-link wg-nav-add" data-bs-toggle="modal" data-bs-target="#server-modal">
+        <i class="fa-regular fa-fw fa-plus" aria-hidden="true"></i> New server
+      </button>
+    </div>
+
+    <div class="wg-nav-section">
+      <a class="wg-nav-link" href="#access" id="nav-access">
+        <i class="fa-regular fa-fw fa-users" aria-hidden="true"></i> Users &amp; sessions
+      </a>
+    </div>
+
+    <div class="wg-signed-in">
+      <span>Signed in as <strong>{{ current_user['username'] }}</strong></span>
+      <a class="wg-nav-link" href="/logout">
+        <i class="fa-regular fa-fw fa-right-from-bracket" aria-hidden="true"></i> Sign out
+      </a>
+    </div>
+  </nav>
+
+  <main class="wg-main">
+    <div class="wg-page" id="page-server" hidden>
+      <div id="server-detail"></div>
+
+      <section class="card wg-card" id="pending-card" aria-labelledby="pending-h">
+        <div class="wg-card-head">
+          <h2 id="pending-h">Waiting for approval</h2>
+          <span class="wg-count" id="pending-count">0</span>
+        </div>
+        <ul class="wg-list" id="pending-list"></ul>
+        <div class="wg-empty" id="pending-empty" hidden>
+          <p>No requests waiting. A device asks to join <span class="server-name"></span> from the <a href="/join">join page</a> in its browser, or by running:</p>
+          <code class="wg-code" id="pending-command"></code>
+        </div>
+      </section>
+
+      <section class="card wg-card" id="peers-card" aria-labelledby="peers-h">
+        <div class="wg-card-head">
+          <h2 id="peers-h">Peers</h2>
+          <span class="wg-count" id="peers-count">0</span>
+        </div>
+        <div class="table-responsive" id="peers-wrap">
+          <table class="table wg-table">
+            <thead>
+              <tr>
+                <th scope="col">Status</th>
+                <th scope="col">Name</th>
+                <th scope="col">Address</th>
+                <th scope="col">Last handshake</th>
+                <th scope="col" class="text-end">Received</th>
+                <th scope="col" class="text-end">Sent</th>
+                <th scope="col">Added</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="wg-empty" id="peers-empty" hidden>No peers on <span class="server-name"></span> yet. Approve a request above, or add one with New peer.</p>
+      </section>
+    </div>
+
+    <div class="wg-page" id="page-empty" hidden>
+      <header class="d-flex flex-column gap-2">
+        <h1 class="wg-title">No servers yet</h1>
+        <p class="wg-subtitle">A server is a WireGuard interface on this machine that devices connect to.</p>
+      </header>
+      <div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#server-modal">
+          <i class="fa-regular fa-plus" aria-hidden="true"></i> Create a server
+        </button>
+      </div>
+    </div>
+
+    <div class="wg-page" id="page-access" hidden>
+      <header class="d-flex flex-column gap-2">
+        <h1 class="wg-title">Users &amp; sessions</h1>
+        <p class="wg-subtitle">Who can sign in to WebWG, and who is signed in now.</p>
+      </header>
+
+      <section class="card wg-card" id="users-card" aria-labelledby="users-h">
+        <div class="wg-card-head">
+          <h2 id="users-h">Users</h2>
+          <span class="wg-count" id="users-count">0</span>
+          <button type="button" class="btn btn-quiet" data-bs-toggle="modal" data-bs-target="#user-modal">
+            <i class="fa-regular fa-plus" aria-hidden="true"></i> Add user
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table wg-table">
+            <thead>
+              <tr>
+                <th scope="col">Username</th>
+                <th scope="col">Role</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created</th>
+                <th scope="col">Last sign-in</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card wg-card" id="sessions-card" aria-labelledby="sessions-h">
+        <div class="wg-card-head">
+          <h2 id="sessions-h">Active sessions</h2>
+          <span class="wg-count" id="sessions-count">0</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table wg-table">
+            <thead>
+              <tr>
+                <th scope="col">User</th>
+                <th scope="col">Signed in with</th>
+                <th scope="col">Browser</th>
+                <th scope="col">IP address</th>
+                <th scope="col">Signed in</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+{% include 'servers.template' %}
+{% include 'peers.template'   %}
+{% include 'users.template'   %}
+
+<div class="modal fade" id="confirm-modal" tabindex="-1" aria-labelledby="confirm-title" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="confirm-title"></h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0" id="confirm-body"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-quiet" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirm-ok"></button>
+      </div>
+    </div>
   </div>
-  {% include 'servers.template' %}
-  {% include 'peers.template'   %}
-  {% include 'users.template'   %}
+</div>
 {% end %}

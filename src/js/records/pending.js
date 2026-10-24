@@ -4,11 +4,10 @@ var $        = require('jquery')
 var _        = require('underscore')
 var Backbone = require('backbone')
 
+var util     = require('../util.js')
+
 
 class Pending {
-    constructor() {
-    }
-
     static Model = Backbone.Model.extend({
         idAttribute: 'name',
         urlRoot:     '/data/pending/',
@@ -22,77 +21,88 @@ class Pending {
         },
     })
 
+    // requests waiting for approval on the current server
     static View = Backbone.View.extend({
-        el: function() { return $('#pending-table') },
+        el: function() { return $('#pending-card') },
 
         initialize: function(options) {
-            _.bindAll(this, 'Add')
+            this.app   = options.app
+            this.rows  = []
+            this.$list = this.$('#pending-list')
 
-            this.$tbody = this.$('tbody')
-
-            this.listenTo(this.collection, 'add',   this.Add)
-            this.listenTo(this.collection, 'reset', function(models) {
-                this.$tbody.empty()
-                models.each((model) => {
-                    this.Add(model)
-                    return
-                })
-            })
-
-            return this
-        },
-
-        Add: function(model) {
-            let entry = new Pending.Row({
-                id: `req_row_${ model.id }`,
-                model: model,
-                })
-            this.$tbody.append(entry.$el)
-        },
-    })
-
-    static Row = Backbone.View.extend({
-        tagName: 'tr',
-
-        events: {
-            'click .approve-req' : 'onApprove',
-            'click .del-row'     : 'onDelete',
-        },
-
-        initialize: function(options) {
-            _.bindAll(this, 'render')
-
-            this.template = Templates['req-row']
-
-            this.render()
-
-            this.listenTo(this.model, 'change',  this.render)
-            this.listenTo(this.model, 'remove',  this.remove)
-            this.listenTo(this.model, 'destroy', this.remove)
+            this.listenTo(this.collection, 'add remove reset', this.render)
+            this.listenTo(this.app.state,  'change:instance',  this.render)
+            this.listenTo(this.app.state,  'tick',             this.tick)
 
             return this
         },
 
         render: function() {
-            let model = this.model.toJSON()
-            this.$el.html(this.template(model))
+            let instance = this.app.state.get('instance')
+            let models   = _.sortBy(this.collection.where({instance: instance}), (model) => model.get('created'))
+
+            _.invoke(this.rows, 'remove')
+            this.rows = models.map((model) => new Pending.Row({model: model}))
+            this.$list.append(this.rows.map((row) => row.el))
+
+            let count = this.$('#pending-count')
+            count.text(models.length)
+            count.toggleClass('wg-count-warn', !!models.length)
+            this.$list.prop('hidden', !models.length)
+            this.$('#pending-empty').prop('hidden', !!models.length)
+            this.$('#pending-command').text(`python3 cliwg.py ${location.origin} <name> -i ${instance}`)
+            return this
+        },
+
+        tick: function() {
+            _.invoke(this.rows, 'render')
+        },
+    })
+
+    static Row = Backbone.View.extend({
+        tagName:   'li',
+        className: 'wg-req',
+
+        events: {
+            'click .approve-req' : 'onApprove',
+            'click .reject-req'  : 'onReject',
+        },
+
+        initialize: function(options) {
+            this.template = Templates['req-row']
+            this.listenTo(this.model, 'change', this.render)
+            this.render()
+            return this
+        },
+
+        render: function() {
+            let request = this.model.toJSON()
+            request.when = util.ago(request.created)
+            let html = this.template(request)
+            if (html !== this.html) {
+                this.$el.html(html)
+                this.html = html
+            }
             return this
         },
 
         onApprove: function(event) {
-            this.model.save(null, {wait:true})
-            event.stopPropagation()
-            return false
+            this.$('button').prop('disabled', true)
+            this.model.save(null, {
+                wait:  true,
+                error: () => this.$('button').prop('disabled', false),
+            })
         },
 
-        onDelete: function (event) {
-            this.model.destroy({wait: true})
-            event.stopPropagation()
-            return false
+        onReject: function(event) {
+            this.$('button').prop('disabled', true)
+            this.model.destroy({
+                wait:  true,
+                error: () => this.$('button').prop('disabled', false),
+            })
         },
     })
 }
 
 
 module.exports = Pending
-

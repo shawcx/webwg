@@ -1,66 +1,830 @@
 
-$bg: #e9ecef;
-//$bg: #2e3436;
-//$fg: #eeeeec;
-$fg: #1e2426;
-$outline: #fff;
+// design tokens
+$ink:     #16181D;
+$ink-2:   #3D434E;
+$muted:   #5B616E;
+$ground:  #F4F5F7;
+$line:    #E1E4E8;
+$line-2:  #EEF0F3;
+$field:   #C9CED6;
+$quiet:   #D5D9DF;
+$accent:  #1F5FD1;
+$ok:      #1A7F37;
+$amber:   #B45309;
+$red:     #B42318;
+$sidebar: #16181D;
 
-$modal-header-bg: #e9ecef;
-$modal-footer-bg: #e9ecef;
+$primary: $accent;
+$success: $ok;
+$danger:  $red;
+
+// bootstrap paints cards, dialogs, tables and inputs with the body colour,
+// so keep that white and give only the page itself the grey ground
+$body-bg:    #fff;
+$body-color: $ink;
+$border-color: $line;
+$link-decoration: none;
+
+$font-family-sans-serif: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+$font-family-monospace:  'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+$font-size-base: 0.9375rem;
+$headings-font-weight: 600;
+
+$border-radius:    0.5rem;
+$border-radius-sm: 0.375rem;
+$border-radius-lg: 0.75rem;
+
+$input-btn-padding-y: 0.5625rem;
+$input-btn-padding-x: 0.875rem;
+$input-border-color:  $field;
+$btn-font-weight: 500;
+$form-label-font-weight: 500;
+
+$card-border-color:  $line;
+$card-border-radius: 0.75rem;
+$card-cap-bg:        #fff;
+$card-spacer-y:      1.25rem;
+$card-spacer-x:      1.25rem;
+
+$table-cell-padding-y: 0.875rem;
+$table-cell-padding-x: 1rem;
+$table-border-color:   $line-2;
+
+$modal-content-border-radius: 0.875rem;
+$modal-header-border-color:   $line-2;
+$modal-footer-border-color:   $line-2;
+$modal-header-padding:        1.25rem 1.5rem;
+$modal-inner-padding:         1.5rem;
 
 @import 'bootstrap';
 
 @import "fontawesome";
 @import "regular";
 
-* {
-    font-family: monospace;
-}
-
-body {
-    //font-family: sans-serif;
-    font-size: 12pt;
-    background: $bg;
-    color: $fg;
-    background: $bg;
-    //background: $bg url("/images/bg.jpg") no-repeat fixed top;
-    background-size: cover;
-    margin-top: 0.5em;
-}
-
-@keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-.fade-in { animation: fadeIn 1s; }
-
-nav, div.card {
-    margin-bottom: 1em;
-}
-
-.webwg-label {
-    min-width: 7em;
-}
-
-.webwg-form {
-    > div.row:not(:first-child) {
-        margin-top: 0.25em;
+@mixin plex($family, $file, $weight) {
+    @font-face {
+        font-family: $family;
+        font-style: normal;
+        font-weight: $weight;
+        font-display: swap;
+        src: url("/static/fonts/#{$file}-latin-#{$weight}-normal.woff2") format("woff2");
     }
 }
 
-.modal-header {
-    background: $modal-header-bg;
+@include plex('IBM Plex Sans', 'ibm-plex-sans', 400);
+@include plex('IBM Plex Sans', 'ibm-plex-sans', 500);
+@include plex('IBM Plex Sans', 'ibm-plex-sans', 600);
+@include plex('IBM Plex Mono', 'ibm-plex-mono', 400);
+@include plex('IBM Plex Mono', 'ibm-plex-mono', 500);
+
+body {
+    background-color: $ground;
 }
 
-a {
-    text-decoration: none;
+// every control is at least 44px tall so it is easy to hit
+.btn, .form-control, .form-select {
+    min-height: 44px;
 }
 
-th,td {
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+// a white button with a grey border for secondary actions
+.btn-quiet {
+    --bs-btn-color: #{$ink};
+    --bs-btn-bg: #fff;
+    --bs-btn-border-color: #{$quiet};
+    --bs-btn-hover-color: #{$ink};
+    --bs-btn-hover-bg: #{$line-2};
+    --bs-btn-hover-border-color: #{$field};
+    --bs-btn-active-color: #{$ink};
+    --bs-btn-active-bg: #{$line};
+    --bs-btn-active-border-color: #{$field};
+
+    &.text-danger:hover {
+        background: #FDECEA;
+        border-color: #F3C3BD;
+    }
+}
+
+.wg-icon-btn {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius;
+    border: 1px solid transparent;
+    background: transparent;
+    color: $muted;
+    font-size: 1rem;
+
+    &:hover {
+        background: $line-2;
+        color: $ink;
+    }
+}
+
+// a column of blocks that can still be hidden, unlike bootstrap's d-flex
+.wg-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.wg-muted { color: $muted; }
+.wg-dim   { color: $ink-2; }
+.wg-num   { font-variant-numeric: tabular-nums; }
+.min-w-0  { min-width: 0; }
+
+// the app shell: a dark sidebar beside the page, stacked on narrow screens
+.wg-app {
+    min-height: 100vh;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.wg-sidebar {
+    flex: 1 1 240px;
+    box-sizing: border-box;
+    padding: 24px 16px;
+    background: $sidebar;
+    color: #E6E8EC;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.wg-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px;
+}
+
+.wg-logo {
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: $border-radius;
+    background: $accent;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: $font-family-monospace;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.wg-brand-name {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.wg-brand-host {
+    font-size: 12px;
+    color: #9AA1AD;
+}
+
+.wg-nav-heading {
+    margin: 0 0 6px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9AA1AD;
+}
+
+.wg-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wg-nav-link {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: $border-radius;
+    background: transparent;
+    color: #C9CDD4;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+
+    &:hover {
+        background: #22252C;
+        color: #fff;
+    }
+
+    &[aria-current="page"] {
+        background: #2A2E37;
+        color: #fff;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #8AB4F8;
+        outline-offset: -2px;
+    }
+}
+
+.wg-nav-server {
+    justify-content: space-between;
+    min-height: 52px;
+    padding: 6px 12px;
+}
+
+.wg-nav-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.wg-nav-meta {
+    font-family: $font-family-monospace;
+    font-size: 12px;
+    color: #9AA1AD;
+}
+
+.wg-nav-add {
+    color: #9AA1AD;
+}
+
+.wg-nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 16px;
+    border-top: 1px solid #2A2E37;
+}
+
+.wg-signed-in {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 0 0;
+    border-top: 1px solid #2A2E37;
+    font-size: 13px;
+    color: #9AA1AD;
+
+    > span {
+        padding: 0 12px;
+    }
+
+    strong {
+        color: #E6E8EC;
+        font-weight: 500;
+    }
+}
+
+.wg-main {
+    flex: 999 1 560px;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 32px clamp(16px, 4vw, 40px) 56px;
+}
+
+.wg-page, #server-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.wg-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.wg-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+}
+
+.wg-subtitle {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: $ink-2;
+}
+
+.wg-badge {
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: $line-2;
+    color: $ink-2;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.wg-badge-hub {
+    background: #E8EEFB;
+    color: #1F4FB0;
+}
+
+.wg-badge-warn {
+    background: #FDF0DC;
+    color: #8A4B08;
+}
+
+.wg-count {
+    min-width: 24px;
+    box-sizing: border-box;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: $line-2;
+    color: $ink-2;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.wg-count-warn {
+    background: #FDF0DC;
+    color: #8A4B08;
+}
+
+.wg-sidebar .wg-count {
+    flex: none;
+    min-width: 22px;
+    padding: 2px 7px;
+}
+
+// server details
+.wg-details {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px 24px;
+
+    dt {
+        font-size: 12px;
+        font-weight: 400;
+        color: $muted;
+    }
+
+    dd {
+        margin: 4px 0 0;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }
+}
+
+.wg-key-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid $line-2;
+}
+
+.wg-key-label {
+    flex: none;
+    font-size: 12px;
+    color: $muted;
+}
+
+.wg-key {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 13px;
 }
 
-.webwg-hilite {
-    font-style: italic;
+// cards with a heading row and edge to edge content
+.wg-card {
+    overflow: hidden;
+}
+
+.wg-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid $line-2;
+
+    h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .btn {
+        margin-left: auto;
+    }
+}
+
+.wg-empty {
+    margin: 0;
+    padding: 20px;
+    font-size: 14px;
+    color: $muted;
+
+    p {
+        margin: 0 0 10px;
+    }
+}
+
+.wg-code {
+    display: block;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border-radius: $border-radius;
+    background: $ink;
+    color: #E6E8EC;
+    font-family: $font-family-monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+pre.wg-code {
+    margin: 0;
+    padding: 16px;
+    border-radius: 10px;
+}
+
+.wg-table {
+    margin: 0;
+    font-size: 14px;
+
+    th {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: $muted;
+        white-space: nowrap;
+    }
+
+    td {
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    th:first-child, td:first-child { padding-left: 20px; }
+    th:last-child,  td:last-child  { padding-right: 12px; }
+
+    tbody tr:last-child td {
+        border-bottom: 0;
+    }
+}
+
+.wg-actions {
+    text-align: right;
+
+    .btn-link {
+        min-height: 44px;
+        padding: 0 10px;
+        font-weight: 500;
+        text-decoration: none;
+    }
+}
+
+.wg-you {
+    color: $muted;
+    font-size: 13px;
+    padding-right: 8px;
+}
+
+// peer status: a dot and a label
+.wg-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
+    border-radius: 50%;
+    vertical-align: 1px;
+    background: $field;
+}
+
+.wg-status-online .wg-dot { background: $ok; }
+.wg-status-idle   .wg-dot { background: #8A909C; }
+.wg-status-fresh {
+    color: #8A4B08;
+
+    .wg-dot {
+        background: transparent;
+        box-shadow: inset 0 0 0 2px $amber;
+    }
+}
+.wg-status-unknown { color: $muted; }
+
+// requests waiting for approval
+.wg-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wg-req {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+    padding: 14px 20px;
+    border-bottom: 1px solid $line-2;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.wg-req-who {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 2 1 240px;
+    min-width: 0;
+}
+
+.wg-req-name {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.wg-req-meta {
+    font-size: 13px;
+    color: $muted;
+}
+
+.wg-req-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 140px;
+    font-size: 14px;
+}
+
+.wg-label {
+    font-size: 12px;
+    color: $muted;
+}
+
+.wg-req-actions {
+    display: flex;
+    gap: 8px;
+}
+
+// notes inside dialogs and pages
+.wg-note {
+    margin: 0;
+    display: flex;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: $ground;
+    color: $ink-2;
+    font-size: 13px;
+
+    > i {
+        margin-top: 3px;
+    }
+}
+
+.wg-note-warn {
+    background: #FDF0DC;
+    color: #6E3A06;
+    font-size: 14px;
+}
+
+.wg-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .form-label {
+        font-size: 14px;
+    }
+
+    .form-text {
+        font-size: 13px;
+        color: $muted;
+    }
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    gap: 8px;
+
+    > * {
+        margin: 0;
+    }
+}
+
+// the server type picker
+.wg-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    legend {
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+}
+
+.wg-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid $quiet;
+    border-radius: 10px;
+    background: #fff;
+    cursor: pointer;
+
+    input {
+        margin: 3px 0 0;
+        width: 18px;
+        height: 18px;
+        flex: none;
+        accent-color: $accent;
+    }
+
+    &:has(input:checked) {
+        border-color: $accent;
+        box-shadow: inset 0 0 0 1px $accent;
+        background: #F7F9FD;
+    }
+
+    &:has(input:disabled) {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.wg-choice-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    color: $muted;
+
+    strong {
+        font-size: 15px;
+        font-weight: 600;
+        color: $ink;
+    }
+}
+
+// the peer config dialog
+.wg-config-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+
+    img {
+        width: 220px;
+        height: 220px;
+        flex: none;
+        image-rendering: pixelated;
+    }
+
+    ol {
+        margin: 0;
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: 14px;
+        color: $ink-2;
+        flex: 1 1 220px;
+    }
+}
+
+// sign in and join pages: one centred column
+.wg-center {
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+}
+
+.wg-narrow {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.wg-wide {
+    max-width: 600px;
+}
+
+.wg-brand-light {
+    padding: 0;
+
+    .wg-logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+
+    .wg-brand-name {
+        font-size: 18px;
+    }
+
+    .wg-brand-host {
+        font-size: 13px;
+        color: $muted;
+    }
+}
+
+.wg-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 28px;
+    background: #fff;
+    border: 1px solid $line;
+    border-radius: 14px;
+
+    h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+    }
+}
+
+.wg-or {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: $muted;
+    font-size: 13px;
+
+    &::before, &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: $line;
+    }
+}
+
+.wg-device {
+    gap: 12px;
+    padding: 18px;
+
+    h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    p {
+        margin: 0;
+        font-size: 13px;
+        color: $muted;
+    }
+}
+
+.wg-small {
+    font-size: 12px;
+    color: $muted;
+}
+
+.alert {
+    font-size: 14px;
+    margin: 0;
 }
