@@ -171,15 +171,7 @@ body {
     width: 32px;
     height: 32px;
     flex: none;
-    border-radius: $border-radius;
-    background: $accent;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: $font-family-monospace;
-    font-weight: 500;
-    font-size: 14px;
+    display: block;
 }
 
 .wg-brand-name {
@@ -768,8 +760,6 @@ pre.wg-code {
     .wg-logo {
         width: 40px;
         height: 40px;
-        border-radius: 10px;
-        font-size: 16px;
     }
 
     .wg-brand-name {

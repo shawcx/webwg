@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- a hub with three peers, drawn for 32px and up -->
+  <rect width="64" height="64" rx="14" fill="#1F5FD1"/>
+  <g stroke="#fff" stroke-width="4.5" stroke-linecap="round">
+    <path d="M32 34 L32 15 M32 34 L48 43 M32 34 L16 43"/>
+  </g>
+  <g fill="#fff">
+    <circle cx="32" cy="34" r="8"/>
+    <circle cx="32" cy="14" r="5.5"/>
+    <circle cx="49" cy="44" r="5.5"/>
+    <circle cx="15" cy="44" r="5.5"/>
+  </g>
+</svg>

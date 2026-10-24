@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="WebWG">
   <title>WebWG</title>
-  <link rel="icon"       type="image/x-icon" href="/static/favicon.ico">
+  <link rel="icon"             href="/static/favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon"             href="/static/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
   <link rel="stylesheet" type="text/css"     href="/static/css/webwg.css" />
 </head>
 <body>

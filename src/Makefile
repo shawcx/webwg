@@ -17,6 +17,9 @@ JOIN_OUT  = $(STATIC_ROOT)/$(JOIN_FILE)
 
 CLIWG_OUT = $(STATIC_ROOT)/cliwg.py
 
+# images/icon.svg is the source, make icons redraws the favicon and touch icon
+ICONS = $(addprefix $(STATIC_ROOT)/,icon.svg favicon.ico apple-touch-icon.png)
+
 CSS_OUT = $(STATIC_ROOT)/css/webwg.css
 CSS_SRC = sass/webwg.scss $(wildcard sass/*.scss)
 
@@ -32,7 +35,7 @@ FONTS_SRC = $(addprefix $(PLEX)-sans/files/ibm-plex-sans-latin-,400-normal.woff2
             $(addprefix $(PLEX)-mono/files/ibm-plex-mono-latin-,400-normal.woff2 500-normal.woff2)
 FONTS     = $(STATIC_ROOT)/fonts
 
-all: node_modules $(JS_OUT) $(JOIN_OUT) $(CSS_OUT) $(WEBFONTS) $(FONTS) $(CLIWG_OUT)
+all: node_modules $(JS_OUT) $(JOIN_OUT) $(CSS_OUT) $(WEBFONTS) $(FONTS) $(CLIWG_OUT) $(ICONS)
 	@#
 
 $(WEBFONTS): $(WEBFONTS_SRC)
@@ -57,9 +60,23 @@ $(JOIN_OUT): $(JOIN_FILE) js/wgkeys.js
 $(CLIWG_OUT): ../cliwg.py
 	@cp -v $< $@
 
+$(ICONS): $(STATIC_ROOT)/%: images/%
+	@cp -v $< $@
+
+# needs rsvg-convert (librsvg2-bin) and ImageMagick, the results are committed
+icons: images/icon.svg images/icon-16.svg
+	rsvg-convert -w 16 -h 16 images/icon-16.svg -o images/16.png
+	rsvg-convert -w 32 -h 32 images/icon.svg -o images/32.png
+	rsvg-convert -w 48 -h 48 images/icon.svg -o images/48.png
+	convert images/16.png images/32.png images/48.png images/favicon.ico
+	sed 's/rx="14"/rx="0"/' images/icon.svg | rsvg-convert -w 180 -h 180 -o images/apple-touch-icon.png
+	@rm images/16.png images/32.png images/48.png
+
 $(CSS_OUT): $(CSS_SRC)
 	@echo sass $< '=>' $@
 	@$(SASS) $(SASS_FLAGS) $< $@
+
+.PHONY: icons clean distclean
 
 clean:
 
@@ -69,4 +86,5 @@ distclean: clean
 	@rm -vf $(JOIN_OUT)
 	@rm -vf $(CLIWG_OUT)
 	@rm -rvf $(FONTS)
+	@rm -vf $(ICONS)
 	@rm -rf node_modules
