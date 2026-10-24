@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME = webwg
+# there are no unit tests, the end to end tests need network namespaces
+export PYBUILD_DISABLE = test
+
+%:
+	dh $@ --buildsystem=pybuild
+
+# the web assets come from npm, so they are built beforehand with make in src
+override_dh_auto_configure:
+	@test -f webwg/static/js/webwg.js || { echo 'webwg/static is missing, run make -C src first' >&2; exit 1; }
+	dh_auto_configure

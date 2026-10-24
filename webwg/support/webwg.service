@@ -1,13 +1,15 @@
 [Unit]
 Description=WebWG Server
+Documentation=man:webwg-server(1) https://github.com/shawcx/webwg
 After=network.target
 
 [Service]
 Type=simple
 ExecStart=webwg-server
-# netlink and the per interface forwarding switch only need CAP_NET_ADMIN, so
-# run as a throwaway user holding just that, the database lives in StateDirectory
-DynamicUser=yes
+# netlink and the per interface forwarding switch only need CAP_NET_ADMIN,
+# so the webwg user holds just that and keeps the database in /var/lib/webwg
+User=webwg
+Group=webwg
 StateDirectory=webwg
 WorkingDirectory=/var/lib/webwg
 AmbientCapabilities=CAP_NET_ADMIN

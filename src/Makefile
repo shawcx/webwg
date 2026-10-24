@@ -26,8 +26,9 @@ CSS_SRC = sass/webwg.scss $(wildcard sass/*.scss)
 SASS_FLAGS = -I ./node_modules/@fortawesome/fontawesome-pro/scss \
              -I ./node_modules/bootstrap/scss
 
-WEBFONTS_SRC = ./node_modules/@fortawesome/fontawesome-pro/webfonts
-WEBFONTS = $(STATIC_ROOT)/webfonts
+# only the regular style is used, and every current browser takes woff2
+WEBFONTS_SRC = ./node_modules/@fortawesome/fontawesome-pro/webfonts/fa-regular-400.woff2
+WEBFONTS     = $(STATIC_ROOT)/webfonts
 
 # latin IBM Plex, served from here so pages need nothing outside this server
 PLEX      = ./node_modules/@fontsource/ibm-plex
@@ -39,7 +40,9 @@ all: node_modules $(JS_OUT) $(JOIN_OUT) $(CSS_OUT) $(WEBFONTS) $(FONTS) $(CLIWG_
 	@#
 
 $(WEBFONTS): $(WEBFONTS_SRC)
-	@cp -r $(WEBFONTS_SRC) $(STATIC_ROOT)
+	@mkdir -p $@
+	@cp $^ $@
+	@touch $@
 
 $(FONTS): $(FONTS_SRC)
 	@mkdir -p $@

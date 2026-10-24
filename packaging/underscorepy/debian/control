@@ -1,0 +1,29 @@
+Source: underscorepy
+Section: python
+Priority: optional
+Maintainer: Matthew Shaw <mshaw.cx@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-python3,
+               pybuild-plugin-pyproject,
+               python3-all,
+               python3-setuptools (>= 77),
+Standards-Version: 4.7.2
+Homepage: https://shaw.cx/_.py
+Rules-Requires-Root: no
+
+Package: python3-underscorepy
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3-sqlalchemy (>= 2),
+         python3-tornado (>= 6.3),
+Suggests: python3-aiosqlite,
+          python3-alembic,
+          python3-asyncpg,
+          python3-ldap,
+          python3-protobuf,
+          python3-redis,
+Description: application framework on Tornado and SQLAlchemy (_.py)
+ underscorepy, imported as _, builds web applications on Tornado and
+ SQLAlchemy with pluggable logins, sessions, records and REST handlers
+ configured from ini files.

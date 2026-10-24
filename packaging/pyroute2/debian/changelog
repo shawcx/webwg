@@ -1,0 +1,7 @@
+pyroute2 (0.9.7-0webwg1) unstable; urgency=medium
+
+  * Upstream 0.9.7 for webwg, which needs the asyncio API that Debian 13
+    and Ubuntu up to 26.04 do not have yet. The version sorts below a
+    Debian 0.9.7-1, so a distribution package replaces this one.
+
+ -- Matthew Shaw <mshaw.cx@gmail.com>  Sat, 24 Oct 2026 14:43:54 -0400

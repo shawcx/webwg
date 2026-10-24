@@ -1,0 +1,25 @@
+Source: pyroute2
+Section: python
+Priority: optional
+Maintainer: Matthew Shaw <mshaw.cx@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-python3,
+               pybuild-plugin-pyproject,
+               python3-all,
+               python3-setuptools,
+               python3-wheel,
+Standards-Version: 4.7.2
+Homepage: https://github.com/svinota/pyroute2
+Rules-Requires-Root: no
+
+Package: python3-pyroute2
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends},
+Suggests: python3-psutil,
+Description: Python netlink library
+ Pyroute2 is a pure Python netlink library for managing network links,
+ addresses, routes, WireGuard and more, with sync and asyncio APIs.
+ .
+ This is the upstream 0.9 release, built for webwg ahead of the
+ distribution package.

@@ -1,0 +1,4 @@
+d /var/lib/webwg          0750 webwg webwg -
+# the settings can hold the GitLab client secret, so only the service reads them
+d /etc/webwg              0750 root  webwg -
+z /etc/webwg/webwg.ini    0640 root  webwg -

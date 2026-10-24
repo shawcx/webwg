@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# Builds the webwg deb and the pyroute2 and underscorepy debs it needs into
+# the directory given. Runs on Debian 13 with the build dependencies below
+# installed, `make deb` runs it in a debian:trixie container.
+#
+#   debhelper dh-python pybuild-plugin-pyproject python3-all
+#   python3-setuptools python3-wheel curl ca-certificates lintian
+#
+# webwg/static has to be built first with make in src.
+
+set -eu
+
+SRC=$(cd "$(dirname "$0")/.." && pwd)
+OUT=$(mkdir -p "${1:-$SRC/dist}" && cd "${1:-$SRC/dist}" && pwd)
+WORK=$(mktemp -d)
+trap 'rm -rf "$WORK"' EXIT
+
+# a dependency comes from its PyPI release, checked against packaging/<name>/sha256
+build_dependency() {
+    name=$1
+    version=$(dpkg-parsechangelog -l "$SRC/packaging/$name/debian/changelog" -S Version | sed 's/-[^-]*$//')
+    orig="$WORK/${name}_$version.orig.tar.gz"
+
+    curl -fsSL -o "$orig" "https://files.pythonhosted.org/packages/source/$(echo "$name" | cut -c1)/$name/$name-$version.tar.gz"
+    echo "$(cat "$SRC/packaging/$name/sha256")  $orig" | sha256sum -c --quiet -
+
+    mkdir "$WORK/$name"
+    tar -xzf "$orig" -C "$WORK/$name" --strip-components=1
+    cp -r "$SRC/packaging/$name/debian" "$WORK/$name/"
+    (cd "$WORK/$name" && dpkg-buildpackage -b -us -uc)
+}
+
+build_dependency pyroute2
+build_dependency underscorepy
+
+# webwg builds from a copy of this tree, without what git and npm left around
+mkdir "$WORK/webwg"
+tar -C "$SRC" --exclude=./.git --exclude=./.venv --exclude=./dist --exclude=./src/node_modules \
+    --exclude='__pycache__' --exclude=./packaging -cf - . | tar -C "$WORK/webwg" -xf -
+(cd "$WORK/webwg" && dpkg-buildpackage -b -us -uc)
+
+cp "$WORK"/*.deb "$OUT"/
+if command -v lintian >/dev/null; then
+    lintian --info --display-info "$OUT"/*.deb || true
+fi
+ls -l "$OUT"/*.deb

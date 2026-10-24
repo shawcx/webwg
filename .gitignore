@@ -5,4 +5,11 @@
 /build
 /dist
 /deb_dist
+# debhelper and pybuild leftovers from building the deb in place
+/.pybuild
+/debian/.debhelper
+/debian/debhelper-build-stamp
+/debian/files
+/debian/*.substvars
+/debian/webwg
 /*.egg-info

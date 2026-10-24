@@ -1,0 +1,2 @@
+# upstream ships no manual pages for its command line tools
+python3-pyroute2: no-manual-page [usr/bin/*]

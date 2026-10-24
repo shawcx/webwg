@@ -1,0 +1,5 @@
+underscorepy (0.10.0-1) unstable; urgency=medium
+
+  * Package 0.10.0 with debhelper and pybuild in place of stdeb.
+
+ -- Matthew Shaw <mshaw.cx@gmail.com>  Sat, 24 Oct 2026 14:43:54 -0400

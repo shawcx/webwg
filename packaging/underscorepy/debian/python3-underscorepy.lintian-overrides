@@ -1,0 +1,2 @@
+# built for webwg, not uploaded to Debian, so there is no ITP bug to close
+python3-underscorepy: initial-upload-closes-no-bugs *

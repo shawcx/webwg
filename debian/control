@@ -1,0 +1,32 @@
+Source: webwg
+Section: net
+Priority: optional
+Maintainer: Matthew Shaw <mshaw.cx@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-sequence-installsysusers,
+               dh-sequence-python3,
+               pybuild-plugin-pyproject,
+               python3-all,
+               python3-setuptools,
+Standards-Version: 4.7.2
+Homepage: https://github.com/shawcx/webwg
+Rules-Requires-Root: no
+
+Package: webwg
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3-aiosqlite,
+         python3-alembic,
+         python3-cryptography,
+         python3-pil,
+         python3-pyroute2 (>= 0.9),
+         python3-qrcode,
+         python3-sqlalchemy (>= 2),
+Recommends: wireguard-tools,
+Description: web admin for WireGuard servers
+ WebWG runs WireGuard servers on this machine and lets admins approve
+ devices, add peers and hand out their configs from a browser.
+ .
+ Devices can ask to join from a page where their keys are made in the
+ browser and never sent anywhere, or with the cliwg.py client.

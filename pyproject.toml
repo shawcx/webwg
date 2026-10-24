@@ -1,0 +1,34 @@
+[build-system]
+requires      = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name            = "webwg"
+dynamic         = ["version"]
+description     = "Web admin for WireGuard servers"
+readme          = "README.rst"
+authors         = [{ name = "Matthew Shaw", email = "mshaw.cx@gmail.com" }]
+requires-python = ">=3.10"
+dependencies    = [
+    "underscorepy[sqlite,migrations]>=0.10",
+    "cryptography",
+    "qrcode[pil]",
+    "pyroute2>=0.9",
+]
+
+[project.urls]
+Homepage = "https://github.com/shawcx/webwg"
+
+[project.scripts]
+webwg-server = "webwg:WebWg.main"
+
+[tool.setuptools]
+# listed so the template, static and support folders stay data, not packages
+packages = ["webwg", "webwg.data"]
+
+[tool.setuptools.dynamic]
+version = { attr = "webwg.version.__version__" }
+
+[tool.setuptools.package-data]
+# webwg/static is built by make in src before packaging
+webwg = ["*.ini", "templates/*", "support/*", "static/**/*"]

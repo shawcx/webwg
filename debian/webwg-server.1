@@ -1,0 +1,66 @@
+.TH WEBWG-SERVER 1 "October 2026" "webwg 0.3.0" "User Commands"
+.SH NAME
+webwg-server \- web admin for WireGuard servers
+.SH SYNOPSIS
+.B webwg-server
+.RI [ options ]
+.SH DESCRIPTION
+.B webwg-server
+runs WireGuard servers on this machine and serves a web page where admins
+approve devices, add peers and hand out their configs. Devices ask to join
+from its join page, where their keys are made in the browser, or with the
+.B cliwg.py
+client it serves.
+.PP
+It manages WireGuard interfaces over netlink, so it needs root or
+CAP_NET_ADMIN. The packaged service runs it as the
+.B webwg
+user with only that capability, from
+.IR /var/lib/webwg .
+.SH OPTIONS
+.TP
+.BR \-I ", " \-\-ini " \fIpath\fR"
+Read an additional ini file.
+.TP
+.BR \-a ", " \-\-address " \fIaddress\fR"
+Address to listen on, 127.0.0.1 by default.
+.TP
+.BR \-p ", " \-\-port " \fIport\fR"
+Port to listen on, 9999 by default.
+.TP
+.B \-\-sqlite\-migrate
+Apply schema changes that cannot lose data to the database at startup. Without it
+webwg stops and lists the changes when the database is out of date.
+.TP
+.BI \-\-dblogin\-add\-user " user password"
+Create a user, or set the password of an existing one, and exit.
+.TP
+.B \-\-dblogin\-list\-users
+List the users and exit.
+.TP
+.BI \-\-nginx " \fR[\fIserver_name\fR]"
+Install an nginx site for webwg.
+.TP
+.BI \-\-systemd " \fR[\fIuser\fR]"
+Install a systemd service for webwg. Not needed with the package, which
+ships its own.
+.TP
+.BR \-D ", " \-\-debug
+Log verbose debugging information.
+.TP
+.BR \-h ", " \-\-help
+Show the options and exit.
+.SH FILES
+.TP
+.I /etc/webwg/webwg.ini
+Settings that override the defaults shipped with webwg, including the
+database path.
+.TP
+.I /var/lib/webwg/webwg.db
+The database of servers, peers, requests, users and sessions.
+.SH EXAMPLES
+Create the first admin user for the packaged service:
+.PP
+.EX
+sudo \-u webwg webwg\-server \-\-dblogin\-add\-user admin 'password'
+.EE

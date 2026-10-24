@@ -1,0 +1,17 @@
+webwg for Debian
+================
+
+The webwg service starts on install and listens on 127.0.0.1:9999. Put a
+reverse proxy with TLS in front of it, since the page where devices ask to
+join only works over HTTPS.
+
+It runs as the webwg user holding only CAP_NET_ADMIN, which is enough to
+manage WireGuard interfaces, and keeps its database in /var/lib/webwg.
+
+Create the first admin user:
+
+    sudo -u webwg webwg-server --dblogin-add-user admin 'password'
+
+Settings in /etc/webwg/webwg.ini override the defaults shipped in
+/usr/lib/python3/dist-packages/webwg/webwg.ini. That file is readable only
+by root and the webwg group, since it can hold the GitLab client secret.

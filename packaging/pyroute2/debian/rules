@@ -1,0 +1,8 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME = pyroute2
+# the upstream tests need root and real network interfaces
+export PYBUILD_DISABLE = test
+
+%:
+	dh $@ --buildsystem=pybuild
