@@ -13,7 +13,7 @@
 
     {% if message %}
     <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
-      <i class="fa-regular fa-circle-exclamation" aria-hidden="true"></i>
+      <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
       {{ 'Wrong username or password.' if message == 'Invalid Login' else message }}
     </div>
     {% end %}
@@ -32,7 +32,7 @@
       <button type="submit" class="btn btn-primary w-100">Sign in</button>
       <div class="wg-or" aria-hidden="true">or</div>
       <a class="btn btn-quiet w-100" href="/login/gitlab">
-        <i class="fa-regular fa-key" aria-hidden="true"></i> Sign in with GitLab
+        <i class="bi bi-key" aria-hidden="true"></i> Sign in with GitLab
       </a>
     </form>
 
@@ -41,7 +41,7 @@
       <div class="d-flex flex-wrap gap-2">
         <a class="btn btn-primary" href="/join">Request access in the browser</a>
         <a class="btn btn-quiet" href="/static/cliwg.py" download>
-          <i class="fa-regular fa-download" aria-hidden="true"></i> cliwg.py
+          <i class="bi bi-download" aria-hidden="true"></i> cliwg.py
         </a>
       </div>
       <span class="wg-small">cliwg.py needs Python 3 and python3-cryptography.</span>

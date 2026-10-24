@@ -14,7 +14,6 @@
     "url": "git+https://github.com/shawcx/webwg.git"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-pro": "^6.3.0",
     "@popperjs/core": "^2.11.6",
     "browserify": "^17.0.0",
     "sass": "^1.57.1"
@@ -24,6 +23,7 @@
     "@fontsource/ibm-plex-sans": "^5.3.0",
     "backbone": "^1.4.1",
     "bootstrap": "^5.3.0-alpha1",
+    "bootstrap-icons": "^1.13.2",
     "jquery": "^3.6.3",
     "qrcode-generator": "^2.0.4",
     "underscore": "^1.13.6"

@@ -125,7 +125,7 @@ exports.flash = function(button, ok) {
     let label = button.querySelector('.label')
     let saved = [icon && icon.className, label && label.textContent]
     if (icon) {
-        icon.className = `fa-regular ${ok ? 'fa-check' : 'fa-xmark'}`
+        icon.className = `bi ${ok ? 'bi-check-lg' : 'bi-x-lg'}`
     }
     if (label) {
         label.textContent = ok ? 'Copied' : 'Copy failed'

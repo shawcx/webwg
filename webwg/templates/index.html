@@ -20,27 +20,27 @@
       <h2 class="wg-nav-heading" id="nav-servers">Servers</h2>
       <ul class="wg-nav" id="server-nav" aria-labelledby="nav-servers"></ul>
       <button type="button" class="wg-nav-link wg-nav-add" data-bs-toggle="modal" data-bs-target="#server-modal">
-        <i class="fa-regular fa-fw fa-plus" aria-hidden="true"></i> New server
+        <i class="bi bi-plus-lg" aria-hidden="true"></i> New server
       </button>
     </div>
 
     <div class="wg-nav-section">
       <a class="wg-nav-link" href="#access" id="nav-access">
-        <i class="fa-regular fa-fw fa-users" aria-hidden="true"></i> Users &amp; sessions
+        <i class="bi bi-people" aria-hidden="true"></i> Users &amp; sessions
       </a>
     </div>
 
     <div class="wg-signed-in">
       <span>Signed in as <strong>{{ current_user['username'] }}</strong></span>
       <a class="wg-nav-link" href="/logout">
-        <i class="fa-regular fa-fw fa-right-from-bracket" aria-hidden="true"></i> Sign out
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Sign out
       </a>
     </div>
   </nav>
 
   <main class="wg-main">
     <div class="alert alert-danger wg-alert" id="page-error" role="alert" hidden>
-      <i class="fa-regular fa-circle-exclamation" aria-hidden="true"></i>
+      <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
       <span class="message"></span>
       <button type="button" class="btn-close" aria-label="Dismiss"></button>
     </div>
@@ -92,7 +92,7 @@
       </header>
       <div>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#server-modal">
-          <i class="fa-regular fa-plus" aria-hidden="true"></i> Create a server
+          <i class="bi bi-plus-lg" aria-hidden="true"></i> Create a server
         </button>
       </div>
     </div>
@@ -108,7 +108,7 @@
           <h2 id="users-h">Users</h2>
           <span class="wg-count" id="users-count">0</span>
           <button type="button" class="btn btn-quiet" data-bs-toggle="modal" data-bs-target="#user-modal">
-            <i class="fa-regular fa-plus" aria-hidden="true"></i> Add user
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Add user
           </button>
         </div>
         <div class="table-responsive">

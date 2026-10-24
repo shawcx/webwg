@@ -23,26 +23,19 @@ ICONS = $(addprefix $(STATIC_ROOT)/,icon.svg favicon.ico apple-touch-icon.png)
 CSS_OUT = $(STATIC_ROOT)/css/webwg.css
 CSS_SRC = sass/webwg.scss $(wildcard sass/*.scss)
 
-SASS_FLAGS = -I ./node_modules/@fortawesome/fontawesome-pro/scss \
+SASS_FLAGS = -I ./node_modules/bootstrap-icons/font \
              -I ./node_modules/bootstrap/scss
 
-# only the regular style is used, and every current browser takes woff2
-WEBFONTS_SRC = ./node_modules/@fortawesome/fontawesome-pro/webfonts/fa-regular-400.woff2
-WEBFONTS     = $(STATIC_ROOT)/webfonts
-
-# latin IBM Plex, served from here so pages need nothing outside this server
+# latin IBM Plex and Bootstrap Icons, served from here so pages need nothing
+# outside this server, every current browser takes woff2
 PLEX      = ./node_modules/@fontsource/ibm-plex
 FONTS_SRC = $(addprefix $(PLEX)-sans/files/ibm-plex-sans-latin-,400-normal.woff2 500-normal.woff2 600-normal.woff2) \
-            $(addprefix $(PLEX)-mono/files/ibm-plex-mono-latin-,400-normal.woff2 500-normal.woff2)
+            $(addprefix $(PLEX)-mono/files/ibm-plex-mono-latin-,400-normal.woff2 500-normal.woff2) \
+            ./node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2
 FONTS     = $(STATIC_ROOT)/fonts
 
-all: node_modules $(JS_OUT) $(JOIN_OUT) $(CSS_OUT) $(WEBFONTS) $(FONTS) $(CLIWG_OUT) $(ICONS)
+all: node_modules $(JS_OUT) $(JOIN_OUT) $(CSS_OUT) $(FONTS) $(CLIWG_OUT) $(ICONS)
 	@#
-
-$(WEBFONTS): $(WEBFONTS_SRC)
-	@mkdir -p $@
-	@cp $^ $@
-	@touch $@
 
 $(FONTS): $(FONTS_SRC)
 	@mkdir -p $@

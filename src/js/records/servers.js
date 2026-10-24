@@ -12,17 +12,17 @@ var Peers     = require('./peers.js')
 var types = {
     hub: {
         label : 'Hub',
-        icon  : 'fa-arrows-left-right',
+        icon  : 'bi-arrow-left-right',
         note  : 'Peers can reach each other through this server',
     },
     isolated: {
         label : 'Isolated',
-        icon  : 'fa-arrow-right-to-line',
+        icon  : 'bi-arrow-bar-right',
         note  : 'Peers can reach this server only, not each other',
     },
     proxy: {
         label : 'Proxy',
-        icon  : 'fa-globe',
+        icon  : 'bi-globe',
         note  : 'Routes peers out to the internet',
     },
 }
@@ -104,7 +104,7 @@ class Servers {
                 return this
             }
             let server = model.toJSON()
-            _.extend(server, types[server.type] || {label: server.type, icon: 'fa-server', note: ''})
+            _.extend(server, types[server.type] || {label: server.type, icon: 'bi-hdd-stack', note: ''})
             server.typeLabel = server.label
             server.subnet    = util.subnet(server.network)
             this.$el.html(this.template(server))

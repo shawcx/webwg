@@ -8,17 +8,20 @@ Copyright: 2015-2026 Matthew Shaw <mshaw.cx@gmail.com>
 License: TBD
  A license has not been chosen yet.
 
-Files: webwg/static/fonts/*
+Files: webwg/static/fonts/ibm-plex-*
 Copyright: 2017 IBM Corp.
 License: OFL-1.1
  The IBM Plex fonts are licensed under the SIL Open Font License 1.1, see
  https://openfontlicense.org/open-font-license-official-text/
 
-Files: webwg/static/webfonts/*
-Copyright: Fonticons, Inc.
-License: Font-Awesome-Pro
- Font Awesome Pro, used under its commercial license, see
- https://fontawesome.com/license
+Files: webwg/static/fonts/bootstrap-icons.woff2
+Copyright: 2019-2024 The Bootstrap Authors
+License: MIT
+
+Files: webwg/static/css/*
+Copyright: The Bootstrap Authors (Bootstrap, Bootstrap Icons)
+Comment: The stylesheet also holds webwg's own styles, covered by the first stanza.
+License: MIT
 
 Files: webwg/static/js/*
 Copyright: OpenJS Foundation and other contributors (jQuery)
@@ -26,9 +29,10 @@ Copyright: OpenJS Foundation and other contributors (jQuery)
            Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors (Backbone, Underscore)
            Floating UI contributors (Popper)
            Kazuhiko Arase (qrcode-generator)
+Comment: The bundled scripts also hold webwg's own code, covered by the first stanza.
 License: MIT
- The bundled scripts also hold webwg's own code, covered by the first stanza.
- .
+
+License: MIT
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights

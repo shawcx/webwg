@@ -10,7 +10,7 @@
   <div class="wg-req-actions">
     <button type="button" class="btn btn-quiet text-danger reject-req">Reject</button>
     <button type="button" class="btn btn-primary approve-req">
-      <i class="fa-regular fa-check" aria-hidden="true"></i> Approve
+      <i class="bi bi-check-lg" aria-hidden="true"></i> Approve
     </button>
   </div>
 </script>
@@ -26,11 +26,11 @@
   <td class="wg-actions">
     <% if (has_config) { %>
     <button type="button" class="btn btn-link show-config">
-      <i class="fa-regular fa-qrcode" aria-hidden="true"></i> Show config
+      <i class="bi bi-qr-code" aria-hidden="true"></i> Show config
     </button>
     <% } %>
     <button type="button" class="wg-icon-btn del-row" aria-label="Remove <%- name %>">
-      <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+      <i class="bi bi-trash3" aria-hidden="true"></i>
     </button>
   </td>
 </script>
@@ -62,7 +62,7 @@
             <div class="form-text" id="peer-address-hint"></div>
           </div>
           <p class="wg-note">
-            <i class="fa-regular fa-circle-info" aria-hidden="true"></i>
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
             <span>WebWG generates this peer's keys. You'll see its config once, as a QR code and text, right after you create it.</span>
           </p>
           <div class="alert alert-danger" id="peer-error" role="alert" hidden></div>
@@ -88,7 +88,7 @@
       </div>
       <div class="modal-body d-flex flex-column gap-4">
         <p class="wg-note wg-note-warn" role="note">
-          <i class="fa-regular fa-triangle-exclamation" aria-hidden="true"></i>
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
           <span>This config holds the peer's private key and is shown only once. WebWG has already deleted its copy.</span>
         </p>
         <div class="wg-config-top">
@@ -103,7 +103,7 @@
           <div class="d-flex align-items-center justify-content-between gap-2">
             <span class="fw-medium">Config</span>
             <button type="button" class="btn btn-quiet" id="config-copy">
-              <i class="fa-regular fa-copy" aria-hidden="true"></i> <span class="label">Copy</span>
+              <i class="bi bi-copy" aria-hidden="true"></i> <span class="label">Copy</span>
             </button>
           </div>
           <pre class="wg-code" id="config-text"></pre>
@@ -111,7 +111,7 @@
       </div>
       <div class="modal-footer">
         <a class="btn btn-quiet" id="config-download">
-          <i class="fa-regular fa-download" aria-hidden="true"></i> <span id="config-download-label">Download</span>
+          <i class="bi bi-download" aria-hidden="true"></i> <span id="config-download-label">Download</span>
         </a>
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
       </div>

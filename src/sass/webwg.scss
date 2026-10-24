@@ -58,8 +58,9 @@ $modal-inner-padding:         1.5rem;
 
 @import 'bootstrap';
 
-@import "fontawesome";
-@import "regular";
+// Bootstrap Icons, its font is served from /static/fonts with IBM Plex
+$bootstrap-icons-font-src: url("/static/fonts/bootstrap-icons.woff2") format("woff2");
+@import "bootstrap-icons";
 
 @mixin plex($family, $file, $weight) {
     @font-face {
@@ -231,6 +232,12 @@ body {
     &:focus-visible {
         outline: 2px solid #8AB4F8;
         outline-offset: -2px;
+    }
+
+    // a fixed width so the labels line up
+    .bi {
+        width: 1.25em;
+        text-align: center;
     }
 }
 
