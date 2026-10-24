@@ -13,14 +13,17 @@ import _
 
 import webwg
 
-from . import handlers
-
 # this will change the default authentication behavior
 # for all the handlers associated with the loaded components
 # must be set before _.settings.load is called
 _.auth.protected = _.auth.filter_user(lambda current_user: current_user)
 
-class WebWg(_.Application):
+# record handlers are open by default, require a session for them as well
+_.auth.records = _.auth.filter_user(lambda current_user: current_user)
+
+from . import handlers
+
+class WebWg(_.WebApplication):
     async def initialize(self):
         self.websockets = {}
         self.interfaces = {}
@@ -58,8 +61,10 @@ class WebWg(_.Application):
         user.disabled = False
         user.isadmin  = True
         user.created  = _.now()
+        data = user._as_dict()
+        data.pop('password', None)
         try:
-            await self.broadcast(dict(action='add', collection='users', data=user._as_dict()))
+            await self.broadcast(dict(action='add', collection='users', data=data))
         except AttributeError:
             pass
 
@@ -117,6 +122,11 @@ class WebWg(_.Application):
             )
         self.ip('link','set', 'up', 'dev', server.interface)
 
+        # hub peers reach each other through the server, so forward packets
+        # received on this interface; isolated peers only reach the server
+        if server.type in ('hub', 'isolated'):
+            self.forwarding(server.interface, server.type == 'hub')
+
     def remove_server(self, server):
         interface = self.interfaces.pop(server.instance, None)
         logging.info('Removing wireguard inteface: %s: %s', server.interface, f'{server.network}/24')
@@ -146,6 +156,18 @@ class WebWg(_.Application):
         self.wg('set', interface,
             'peer', peer.pub, 'remove'
             )
+
+    @staticmethod
+    def forwarding(interface, enable):
+        'set IPv4 forwarding for packets received on a single interface'
+        if not interface or '/' in interface or interface.startswith('.'):
+            logging.warning('Invalid interface name: %s', interface)
+            return
+        try:
+            with open(f'/proc/sys/net/ipv4/conf/{interface}/forwarding', 'w') as fp:
+                fp.write('1' if enable else '0')
+        except OSError as e:
+            logging.warning('Unable to set forwarding on %s: %s', interface, e)
 
     @staticmethod
     def wg(*args, stdin=None):

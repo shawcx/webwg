@@ -30,7 +30,8 @@ class QR(_.handlers.Protected):
         if not pub:
             raise _.HTTPError(404)
 
-        config = self.application.configs.pop(pub, None)
+        # only discard the config once the QR code has been generated
+        config = self.application.configs.get(pub)
         if not config:
             raise _.HTTPError(404)
 
@@ -50,5 +51,6 @@ class QR(_.handlers.Protected):
         buffer = base64.b64encode(buffer.getvalue()).decode('ascii')
         buffer = 'data:image/png;base64,' + buffer
         self.write({'png':buffer,'config':config})
+        self.application.configs.pop(pub, None)
 
         await self.application.broadcast(dict(action='update', collection='peers', key='pub', data={'pub':pub,'has_config':False}))

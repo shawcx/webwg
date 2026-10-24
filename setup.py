@@ -24,10 +24,9 @@ setuptools.setup(
         },
     include_package_data = True,
     install_requires = [
-        'underscorepy',
-        'aiosqlite',
+        'underscorepy[sqlite,migrations]>=0.10',
         'cryptography',
-        'qrcode',
+        'qrcode[pil]',
         ],
     zip_safe = False
     )

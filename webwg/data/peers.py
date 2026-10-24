@@ -65,11 +65,13 @@ class PeersHandler(_.records.HandlerInterface):
             logging.warning('Name conflict: %s', peer.name)
             raise _.HTTPError(409)
 
+        network = server.network.rsplit('.', 1)[0] + '.0'
+
         self.application.configs[peer.pub] = _template.format(
             peer_address   = peer.address,
             mtu            = server.mtu,
             peer_key       = peer_key,
-            server_network = server.network,
+            server_network = f'{network}/24',
             server_host    = peer.remote,
             psk            = peer.psk,
             server_pub     = server.pub,

@@ -159,4 +159,4 @@ class PendingHandler(_.records.HandlerInterface):
         if not count:
             raise _.HTTPError(404)
         self.set_status(204)
-        self.application.broadcast(dict(action='delete', collection='pending', id=name))
+        await self.application.broadcast(dict(action='delete', collection='pending', id=name))

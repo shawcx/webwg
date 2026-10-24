@@ -52,7 +52,7 @@ class ServersHandler(_.records.HandlerInterface):
         
         server_type = self.data.get('type')
         if not server_type:
-            raise tornado.web.HTTPError(500)
+            raise _.HTTPError(500)
 
         logging.info('TODO: handle server type of: %s', server_type)
 

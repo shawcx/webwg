@@ -51,7 +51,7 @@
                 <select class="form-select" id="server-type" name="type">
                   <option value="hub"  > Hub      </option>
                   <option value="proxy"> Proxy    </option>
-                  <option value="proxy"> Isolated </option>
+                  <option value="isolated"> Isolated </option>
                 </select>
               </div>
             </div>
