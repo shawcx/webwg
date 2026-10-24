@@ -38,14 +38,12 @@
 
     <section class="wg-panel wg-device" aria-labelledby="device-h">
       <h2 id="device-h">Adding a device?</h2>
-      <p>Request access from the device itself. An admin approves it here.</p>
       <div class="d-flex flex-wrap gap-2">
         <a class="btn btn-primary" href="/join">Request access in the browser</a>
         <a class="btn btn-quiet" href="/static/cliwg.py" download>
           <i class="fa-regular fa-download" aria-hidden="true"></i> cliwg.py
         </a>
       </div>
-      <code class="wg-code">python3 cliwg.py {{ request.protocol }}://{{ request.host }} &lt;name&gt; -i &lt;server&gt;</code>
       <span class="wg-small">cliwg.py needs Python 3 and python3-cryptography.</span>
     </section>
   </main>
