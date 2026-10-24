@@ -72,6 +72,7 @@ var Pages = Backbone.View.extend({
         for (const name of ['server', 'empty', 'access']) {
             $(`#page-${name}`).prop('hidden', page !== name)
         }
+        $('#page-error').prop('hidden', true)
         $('#nav-access').attr('aria-current', page === 'access' ? 'page' : null)
         if (page === 'access') {
             document.title = 'Users & sessions · WebWG'
@@ -98,6 +99,7 @@ class WebWgApp {
         this.router = new Router({app: this})
 
         new Pages({app: this})
+        $('#page-error .btn-close').on('click', () => $('#page-error').prop('hidden', true))
         new Servers.Nav({app: this, collection: this.servers})
         new Servers.Detail({app: this, collection: this.servers})
         new Servers.ModalView({app: this, collection: this.servers})

@@ -90,7 +90,10 @@ class Pending {
             this.$('button').prop('disabled', true)
             this.model.save(null, {
                 wait:  true,
-                error: () => this.$('button').prop('disabled', false),
+                error: (model, xhr) => {
+                    this.$('button').prop('disabled', false)
+                    util.alert(`Could not approve ${model.id}. ${util.failure(xhr)}`)
+                },
             })
         },
 
@@ -98,7 +101,10 @@ class Pending {
             this.$('button').prop('disabled', true)
             this.model.destroy({
                 wait:  true,
-                error: () => this.$('button').prop('disabled', false),
+                error: (model, xhr) => {
+                    this.$('button').prop('disabled', false)
+                    util.alert(`Could not reject ${model.id}. ${util.failure(xhr)}`)
+                },
             })
         },
     })

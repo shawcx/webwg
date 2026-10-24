@@ -5,7 +5,14 @@ After=network.target
 [Service]
 Type=simple
 ExecStart=webwg-server
-User=root
+# netlink and the per interface forwarding switch only need CAP_NET_ADMIN, so
+# run as a throwaway user holding just that, the database lives in StateDirectory
+DynamicUser=yes
+StateDirectory=webwg
+WorkingDirectory=/var/lib/webwg
+AmbientCapabilities=CAP_NET_ADMIN
+CapabilityBoundingSet=CAP_NET_ADMIN
+NoNewPrivileges=yes
 Restart=on-failure
 
 [Install]

@@ -4,7 +4,6 @@ import dataclasses
 import json
 import logging
 import os
-import subprocess
 import sys
 import time
 import uuid
@@ -29,11 +28,18 @@ class WebWg(_.WebApplication):
         self.interfaces = {}
         self.configs    = {}
         
+        # a server or peer that fails here is logged and the rest still start
         for server in await _.sqlite.find(_.data.servers):
-            self.add_server(server)
+            try:
+                await self.add_server(server)
+            except webwg.wireguard.Error as e:
+                logging.error('%s', e)
 
         for peer in await _.sqlite.find(_.data.peers):
-            self.add_peer(peer)
+            try:
+                await self.add_peer(peer)
+            except webwg.wireguard.Error as e:
+                logging.error('%s', e)
 
         self.patterns = [
             ( r'/qr/(.*)',  webwg.handlers.QR         ),
@@ -46,7 +52,10 @@ class WebWg(_.WebApplication):
 
     async def on_stop(self):
         for server in await _.sqlite.find(_.data.servers):
-            self.remove_server(server)
+            try:
+                await self.remove_server(server)
+            except webwg.wireguard.Error as e:
+                logging.error('%s', e)
 
     async def broadcast(self, msg):
         'Broadcast a message to all connected sockets'
@@ -58,22 +67,15 @@ class WebWg(_.WebApplication):
         if not self.websockets:
             return
 
-        interfaces = set(self.interfaces.values())
-        status = collections.defaultdict(list)
-        # peer lines have 9 tab separated fields, interface lines have 5 and
-        # hold the private key, the preshared key field is never sent on
-        for line in self.wg('show', 'all', 'dump').splitlines():
-            fields = line.split('\t')
-            if len(fields) != 9 or fields[0] not in interfaces:
+        status = {}
+        for interface in set(self.interfaces.values()):
+            try:
+                peers = await webwg.wireguard.peers(interface)
+            except webwg.wireguard.Error as e:
+                logging.warning('%s', e)
                 continue
-            interface, pub, psk, endpoint, allowed, handshake, rx, tx, keepalive = fields
-            status[interface].append(dict(
-                pub       = pub,
-                endpoint  = None if endpoint == '(none)' else endpoint,
-                handshake = int(handshake),
-                rx        = int(rx),
-                tx        = int(tx),
-                ))
+            if peers:
+                status[interface] = peers
 
         if status:
             await self.broadcast(dict(action='status', now=int(time.time()), status=status))
@@ -132,85 +134,32 @@ class WebWg(_.WebApplication):
         elapsed = (time.time() - created) / 3600
         return elapsed > expires
 
-    def add_server(self, server):
+    async def add_server(self, server):
+        logging.info('Creating wireguard interface: %s: %s', server.interface, f'{server.network}/24')
+        await webwg.wireguard.create(server.interface, server.network, server.port, server.priv, server.mtu)
         self.interfaces[server.instance] = server.interface
-        logging.info('Creating wireguard inteface: %s: %s', server.interface, f'{server.network}/24')
-        self.ip('link','add', server.interface, 'type', 'wireguard')
-        self.ip('address','add', 'dev', server.interface, f'{server.network}/24')
-        self.wg('set', server.interface,
-            'listen-port', f'{server.port}',
-            'private-key', '/dev/stdin',
-            stdin=server.priv
-            )
-        self.ip('link','set', 'up', 'dev', server.interface)
 
         # hub peers reach each other through the server, so forward packets
         # received on this interface; isolated peers only reach the server
         if server.type in ('hub', 'isolated'):
-            self.forwarding(server.interface, server.type == 'hub')
+            webwg.wireguard.forwarding(server.interface, server.type == 'hub')
 
-    def remove_server(self, server):
-        interface = self.interfaces.pop(server.instance, None)
-        logging.info('Removing wireguard inteface: %s: %s', server.interface, f'{server.network}/24')
-        self.ip('link','delete', server.interface)
+    async def remove_server(self, server):
+        self.interfaces.pop(server.instance, None)
+        logging.info('Removing wireguard interface: %s: %s', server.interface, f'{server.network}/24')
+        await webwg.wireguard.delete(server.interface)
 
-    def add_peer(self, peer):
-        try:
-            interface = self.interfaces[peer.instance]
-        except KeyError:
-            logging.error('No interface!')
+    async def add_peer(self, peer):
+        interface = self.interfaces.get(peer.instance)
+        if not interface:
+            raise webwg.wireguard.Error(f'Server {peer.instance} has no interface, check the log for why')
+        logging.info('Adding wireguard peer: %s: %s: %s', interface, peer.name, peer.address)
+        await webwg.wireguard.set_peer(interface, peer.pub, peer.psk, f'{peer.address}/32')
+
+    async def remove_peer(self, peer):
+        interface = self.interfaces.get(peer.instance)
+        if not interface:
+            # its server never got an interface, so there is nothing to remove
             return
-        logging.info('Adding wireguard peer: %s: %s: %s', interface, peer.name, f'{peer.address}')
-        self.wg('set', interface,
-            'peer', peer.pub,
-            'preshared-key', '/dev/stdin',
-            'allowed-ips', f'{peer.address}/32',
-            stdin=peer.psk
-            )
-
-    def remove_peer(self, peer):
-        try:
-            interface = self.interfaces[peer.instance]
-        except KeyError:
-            logging.error('No interface!')
-            return
-        logging.info('Removing wireguard peer: %s: %s: %s', interface, peer.name, f'{peer.address}')
-        self.wg('set', interface,
-            'peer', peer.pub, 'remove'
-            )
-
-    @staticmethod
-    def forwarding(interface, enable):
-        'set IPv4 forwarding for packets received on a single interface'
-        if not interface or '/' in interface or interface.startswith('.'):
-            logging.warning('Invalid interface name: %s', interface)
-            return
-        try:
-            with open(f'/proc/sys/net/ipv4/conf/{interface}/forwarding', 'w') as fp:
-                fp.write('1' if enable else '0')
-        except OSError as e:
-            logging.warning('Unable to set forwarding on %s: %s', interface, e)
-
-    @staticmethod
-    def wg(*args, stdin=None):
-        if stdin:
-            stdin = stdin.encode('utf-8')
-        logging.debug('WG: %s', args)
-        out = subprocess.run(
-            ('wg',) + args,
-            capture_output=True,
-            input=stdin,
-            )
-        return out.stdout.decode('utf-8').strip()
-
-    @staticmethod
-    def ip(*args, stdin=None):
-        if stdin:
-            stdin = stdin.encode('utf-8')
-        logging.debug('IP: %s', args)
-        out = subprocess.run(
-            ('ip',) + args,
-            capture_output=True,
-            input=stdin,
-            )
-        return out.stdout.decode('utf-8').strip()
+        logging.info('Removing wireguard peer: %s: %s: %s', interface, peer.name, peer.address)
+        await webwg.wireguard.remove_peer(interface, peer.pub)

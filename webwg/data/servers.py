@@ -41,24 +41,34 @@ class ServersHandler(_.records.HandlerInterface):
 
     @_.auth.protected
     async def put(self, instance):
-        server = await _.sqlite.find_one(_.data.servers, self.data.get('instance'))
-
-        if server:
-            server(**self.data)
-        else:
-            server = _.data.servers._from_dict(self.data)
-            server.priv = self.application.wg('genkey')
-            server.pub = self.application.wg('pubkey', stdin=server.priv)
-        
         server_type = self.data.get('type')
         if not server_type:
             raise _.HTTPError(500)
 
-        logging.info('TODO: handle server type of: %s', server_type)
+        server = await _.sqlite.find_one(_.data.servers, self.data.get('instance'))
+        existing = server is not None
+
+        try:
+            if existing:
+                # the interface comes back below with the new settings and its peers
+                await self.application.remove_server(server)
+                server(**self.data)
+            else:
+                server = _.data.servers._from_dict(self.data)
+                server.priv = webwg.wireguard.genkey()
+                server.pub  = webwg.wireguard.pubkey(server.priv)
+
+            await self.application.add_server(server)
+            if existing:
+                for peer in await _.sqlite.find(_.data.peers, server.instance, 'instance'):
+                    await self.application.add_peer(peer)
+        except webwg.wireguard.Error as e:
+            logging.error('%s', e)
+            self.set_status(500)
+            self.write(dict(error=str(e)))
+            return
 
         await _.sqlite.upsert(server)
-
-        self.application.add_server(server)
 
         server = server._as_dict()
         server.pop('priv')
@@ -77,7 +87,13 @@ class ServersHandler(_.records.HandlerInterface):
         peers = await _.sqlite.find(_.data.peers, server.instance, 'instance')
         pending = await _.sqlite.find(_.data.pending, server.instance, 'instance')
 
-        self.application.remove_server(server)
+        try:
+            await self.application.remove_server(server)
+        except webwg.wireguard.Error as e:
+            logging.error('%s', e)
+            self.set_status(500)
+            self.write(dict(error=str(e)))
+            return
 
         await _.sqlite.delete(server)
     

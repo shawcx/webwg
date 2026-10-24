@@ -6,7 +6,6 @@ import argparse
 import base64
 import collections
 import json
-import subprocess
 import textwrap
 import urllib.parse
 import urllib.request
@@ -45,26 +44,9 @@ def main():
 
     print('[+] Name:', args.peer)
 
-    def _wg(*args, stdin=None):
-        if stdin:
-            stdin = stdin.encode('utf-8')
-        try:
-            out = subprocess.run(
-                ('wg',) + args,
-                capture_output=True,
-                input=stdin,
-                )
-        except FileNotFoundError:
-            print('[!] ERROR: wg command missing')
-            print('      apt install wireguard-tools')
-            print('      https://www.wireguard.com/install/')
-            sys.exit(-1)
-        return out.stdout.decode('utf-8').strip()
-
     peer_ec = EC()
 
-    peer_key = _wg('genkey')
-    peer_pub = _wg('pubkey', stdin=peer_key)
+    peer_key, peer_pub = genkey()
     print('[+] Pub: ', peer_pub)
 
     peer = {
@@ -162,6 +144,7 @@ PublicKey = {server_pub}
 
 try:
     from cryptography.hazmat.primitives.asymmetric         import ec
+    from cryptography.hazmat.primitives.asymmetric         import x25519
     from cryptography.hazmat.primitives.serialization      import Encoding
     from cryptography.hazmat.primitives.serialization      import NoEncryption
     from cryptography.hazmat.primitives.serialization      import PrivateFormat
@@ -173,6 +156,14 @@ except ImportError:
     print('      apt install python3-cryptography')
     print('      https://cryptography.io')
     sys.exit(-1)
+
+
+def genkey():
+    'a WireGuard key pair in base64, the same as wg genkey and wg pubkey'
+    key  = x25519.X25519PrivateKey.generate()
+    priv = key.private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption())
+    pub  = key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
+    return base64.b64encode(priv).decode('ascii'), base64.b64encode(pub).decode('ascii')
 
 
 class EC:

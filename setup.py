@@ -27,6 +27,7 @@ setuptools.setup(
         'underscorepy[sqlite,migrations]>=0.10',
         'cryptography',
         'qrcode[pil]',
+        'pyroute2>=0.9',
         ],
     zip_safe = False
     )

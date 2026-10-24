@@ -75,7 +75,10 @@ class Users {
                 `Delete ${username}?`,
                 `${username} can no longer sign in to WebWG. Sessions they already have stay open until they expire or you sign them out.`,
                 'Delete user',
-                () => this.model.destroy({wait: true}),
+                () => this.model.destroy({
+                    wait:  true,
+                    error: (model, xhr) => util.alert(`Could not delete ${username}. ${util.failure(xhr)}`),
+                }),
                 )
         },
     })

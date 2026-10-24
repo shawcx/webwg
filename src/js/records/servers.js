@@ -143,7 +143,10 @@ class Servers {
                 `Delete ${instance}?`,
                 `This removes the ${model.get('interface')} interface, its ${peers} peers and ${waiting} waiting requests. Devices using it lose access right away.`,
                 'Delete server',
-                () => model.destroy({wait: true}),
+                () => model.destroy({
+                    wait:  true,
+                    error: (model, xhr) => util.alert(`Could not delete ${instance}. ${util.failure(xhr)}`),
+                }),
                 )
         },
     })

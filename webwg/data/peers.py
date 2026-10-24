@@ -5,6 +5,8 @@ import time
 
 import _
 
+import webwg
+
 
 class peers:
     name      : str = _.data.pkey()
@@ -52,17 +54,30 @@ class PeersHandler(_.records.HandlerInterface):
         # TODO: check addresses
         #prefix   = server['network'].rsplit('.', 1)[0] + '.'
 
-        peer_key = self.application.wg('genkey')
-        peer.pub = self.application.wg('pubkey', stdin=peer_key)
-        peer.psk = self.application.wg('genpsk')
+        if await _.sqlite.find_one(_.data.peers, peer.name):
+            logging.warning('Name conflict: %s', peer.name)
+            raise _.HTTPError(409)
+
+        peer_key = webwg.wireguard.genkey()
+        peer.pub = webwg.wireguard.pubkey(peer_key)
+        peer.psk = webwg.wireguard.genpsk()
 
         peer.remote  = f"{server.host}:{server.port}"
         peer.created = int(time.time() * 1000)
 
         try:
+            await self.application.add_peer(peer)
+        except webwg.wireguard.Error as e:
+            logging.error('%s', e)
+            self.set_status(500)
+            self.write(dict(error=str(e)))
+            return
+
+        try:
             await _.sqlite.upsert(peer)
         except _.error as e:
             logging.warning('Name conflict: %s', peer.name)
+            await self.application.remove_peer(peer)
             raise _.HTTPError(409)
 
         network = server.network.rsplit('.', 1)[0] + '.0'
@@ -76,8 +91,6 @@ class PeersHandler(_.records.HandlerInterface):
             psk            = peer.psk,
             server_pub     = server.pub,
             )
-
-        self.application.add_peer(peer)
 
         peer = peer._as_dict()
         peer.pop('psk')
@@ -95,7 +108,13 @@ class PeersHandler(_.records.HandlerInterface):
         if not peer:
             raise _.HTTPError(404)
 
-        self.application.remove_peer(peer)
+        try:
+            await self.application.remove_peer(peer)
+        except webwg.wireguard.Error as e:
+            logging.error('%s', e)
+            self.set_status(500)
+            self.write(dict(error=str(e)))
+            return
 
         await _.sqlite.delete(peer)
 

@@ -141,10 +141,16 @@ class PendingHandler(_.records.HandlerInterface):
         peer.address  = pending.address
         peer.created  = pending.created
 
+        try:
+            await self.application.add_peer(peer)
+        except webwg.wireguard.Error as e:
+            logging.error('%s', e)
+            self.set_status(500)
+            self.write(dict(error=str(e)))
+            return
+
         await _.sqlite.upsert(peer)
         await _.sqlite.delete(pending)
-
-        self.application.add_peer(peer)
 
         peer = peer._as_dict()
         peer['has_config'] = False

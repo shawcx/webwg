@@ -173,7 +173,10 @@ class Peers {
                 `Remove ${name}?`,
                 `${name} loses access to ${this.model.get('instance')} right away. Bringing it back takes a new config.`,
                 'Remove peer',
-                () => this.model.destroy({wait: true}),
+                () => this.model.destroy({
+                    wait:  true,
+                    error: (model, xhr) => util.alert(`Could not remove ${name}. ${util.failure(xhr)}`),
+                }),
                 )
         },
     })

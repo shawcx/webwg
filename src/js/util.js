@@ -165,6 +165,14 @@ exports.confirm = function(title, body, label, action) {
     modal.show()
 }
 
+// show a failed action at the top of the page, for actions without a dialog of their own
+exports.alert = function(message) {
+    let el = document.getElementById('page-error')
+    el.querySelector('.message').textContent = message
+    el.hidden = false
+    window.scrollTo(0, 0)
+}
+
 // fill a form's error box from a failed request, or hide it
 exports.error = function(el, message) {
     el.textContent = message || ''
@@ -174,6 +182,10 @@ exports.error = function(el, message) {
 exports.failure = function(xhr, conflict) {
     if (xhr && 409 === xhr.status && conflict) {
         return conflict
+    }
+    // the server explains failures it can describe, such as a netlink error
+    if (xhr && xhr.responseJSON && xhr.responseJSON.error) {
+        return xhr.responseJSON.error
     }
     if (xhr && xhr.status) {
         return `The server returned ${xhr.status} ${xhr.statusText}.`

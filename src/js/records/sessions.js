@@ -77,7 +77,10 @@ class Sessions {
             this.$('button').prop('disabled', true)
             this.model.destroy({
                 wait:  true,
-                error: () => this.$('button').prop('disabled', false),
+                error: (model, xhr) => {
+                    this.$('button').prop('disabled', false)
+                    util.alert(`Could not sign out that session. ${util.failure(xhr)}`)
+                },
             })
         },
     })
