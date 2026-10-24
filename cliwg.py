@@ -48,11 +48,17 @@ def main():
     def _wg(*args, stdin=None):
         if stdin:
             stdin = stdin.encode('utf-8')
-        out = subprocess.run(
-            ('wg',) + args,
-            capture_output=True,
-            input=stdin,
-            )
+        try:
+            out = subprocess.run(
+                ('wg',) + args,
+                capture_output=True,
+                input=stdin,
+                )
+        except FileNotFoundError:
+            print('[!] ERROR: wg command missing')
+            print('      apt install wireguard-tools')
+            print('      https://www.wireguard.com/install/')
+            sys.exit(-1)
         return out.stdout.decode('utf-8').strip()
 
     peer_ec = EC()
@@ -76,16 +82,18 @@ def main():
     if not args.server.startswith(('http://','https://')):
         args.server = 'https://' + args.server
 
+    # append the endpoint unless given, keeping any reverse proxy prefix
     url = urllib.parse.urlparse(args.server)
-    if not url.path:
-        url = url._replace(path='/data/pending')
+    path = url.path.rstrip('/')
+    if not path.endswith('/data/pending'):
+        url = url._replace(path=path + '/data/pending')
     url = urllib.parse.urlunparse(url)
 
     print('[+] URL: ', url)
     request = urllib.request.Request(url, data=peer, headers=headers)
     request.add_header('Content-Type', 'application/json; charset=utf-8')
     try:
-        response = urllib.request.urlopen(request)
+        response = urllib.request.urlopen(request, timeout=30)
     except urllib.error.HTTPError as e:
         if 410 == e.code:
             if args.instance:
@@ -97,7 +105,8 @@ def main():
             print('[!] ERROR: peer', repr(args.peer), 'already exists')
             return -1
         else:
-            raise
+            print('[!] ERROR: server returned', e.code, e.reason)
+            return -1
     except Exception as e:
         print('[-] Could not connect:', e)
         return -1
@@ -141,8 +150,12 @@ PublicKey = {server_pub}
             print('      apt install python3-qrcode')
             print('      https://github.com/lincolnloop/python-qrcode')
 
-    with open(f'{params["instance"]}-{args.peer}.conf', 'w') as fp:
+    # the config holds the private key so only the owner can read it
+    path = f'{params["instance"]}-{args.peer}.conf'
+    with open(path, 'w', opener=lambda p,f: os.open(p, f, 0o600)) as fp:
+        os.chmod(path, 0o600)
         fp.write(config)
+    print('[+] Conf:', path)
 
     return 0
 
